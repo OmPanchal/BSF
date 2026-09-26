@@ -1,311 +1,242 @@
-import { createHash } from "crypto";
-import { completeJson, hasLlmAccess } from "@/lib/llm";
+import { createHash } from "node:crypto";
+import { evaluateListing, parseIntent, searchPhrase } from "@/lib/intent";
 import { fetchVerifiedListing, type VerifiedListing } from "@/lib/pagePrice";
-import { tavilySearch, type TavilyResult } from "@/lib/tavily";
-import type { Product } from "@/types/contracts";
+import { productSources } from "@/lib/sources";
+import type { ListingHit, SourceQuery } from "@/lib/sources/types";
+import type { Product, ProductMatch, SearchConstraints } from "@/types/contracts";
 
-const MERCHANT_HOSTS = [
-  "amazon.co.uk",
-  "www.amazon.co.uk",
-  "argos.co.uk",
-  "www.argos.co.uk",
-  "johnlewis.com",
-  "www.johnlewis.com",
-  "currys.co.uk",
-  "www.currys.co.uk",
-  "very.co.uk",
-  "www.very.co.uk",
-  "ao.com",
-  "www.ao.com",
-  "richersounds.com",
-  "www.richersounds.com",
-  "apple.com",
-  "www.apple.com",
-];
+const SEARCH_WINDOW_MS = Number(process.env.SEARCH_WINDOW_MS) || 12_000;
+const MAX_PER_SECTION = 8;
+const VERIFY_CONCURRENCY = 4;
 
-const SKIP_HOST_SNIPPETS = [
-  "reddit.com",
-  "youtube.com",
-  "youtu.be",
-  "wikipedia.org",
-  "rtings.com",
-  "trustpilot.com",
-];
+export class SearchInputError extends Error {}
 
-const LISTICLE_HINT =
-  /\b(best|top \d+|vs\.?|compared|round-?up|deals of)\b/i;
-
-function hostnameOf(url: string): string {
-  try {
-    return new URL(url).hostname.toLowerCase();
-  } catch {
-    return "";
-  }
-}
-
-function isMerchantUrl(url: string): boolean {
-  const host = hostnameOf(url);
-  return MERCHANT_HOSTS.some(
-    (allowed) => host === allowed || host.endsWith(`.${allowed}`),
-  );
-}
-
-function looksLikeListing(result: TavilyResult): boolean {
-  const host = hostnameOf(result.url);
-  if (SKIP_HOST_SNIPPETS.some((skip) => host.includes(skip))) {
-    return false;
-  }
-  let pathname = "";
-  try {
-    pathname = new URL(result.url).pathname.toLowerCase();
-  } catch {
-    return false;
-  }
-  if (
-    pathname === "/s" ||
-    pathname.startsWith("/s/") ||
-    pathname === "/b" ||
-    pathname.startsWith("/b/") ||
-    pathname.startsWith("/gp/aw") ||
-    pathname.startsWith("/stores/")
-  ) {
-    return false;
-  }
-  if (LISTICLE_HINT.test(result.title) && !isMerchantUrl(result.url)) {
-    return false;
-  }
-  if (isMerchantUrl(result.url)) {
-    return (
-      /\/(?:dp|gp\/product|product)\//i.test(pathname) || pathname.includes("/p/")
-    );
-  }
-  return /\/(?:dp|gp\/product|product)\//i.test(result.url);
-}
-
-function amazonAsin(url: string): string | undefined {
-  const match = url.match(/\/(?:dp|gp\/product)\/([A-Z0-9]{10})/i);
-  return match?.[1]?.toLowerCase();
+function amazonAsin(text: string): string | undefined {
+  const decoded = (() => {
+    try {
+      return decodeURIComponent(text);
+    } catch {
+      return text;
+    }
+  })();
+  return decoded.match(/(?:\/dp\/|\/gp\/product\/|\/gp\/aw\/d\/)([A-Z0-9]{10})/i)?.[1]?.toUpperCase();
 }
 
 export function productIdFromUrl(url: string): string {
   const asin = amazonAsin(url);
-  if (asin) {
-    return `amz-${asin}`;
-  }
-  return `web-${createHash("sha1").update(url).digest("hex").slice(0, 16)}`;
-}
-
-function canonicalMerchantUrl(url: string): string {
-  const asin = amazonAsin(url);
-  if (asin) {
-    return `https://www.amazon.co.uk/dp/${asin.toUpperCase()}`;
-  }
-  try {
-    const parsed = new URL(url);
-    parsed.hash = "";
-    return parsed.toString();
-  } catch {
-    return url;
-  }
-}
-
-function listingKey(url: string): string {
-  const asin = amazonAsin(url);
-  if (asin) {
-    return `asin:${asin}`;
-  }
-  try {
-    const parsed = new URL(url);
-    return `${parsed.hostname.replace(/^www\./, "").toLowerCase()}${parsed.pathname.replace(/\/$/, "").toLowerCase()}`;
-  } catch {
-    return url;
-  }
-}
-
-export function parseBudgetPence(intent: string): number | undefined {
-  const match = intent.match(
-    /(?:under|below|max(?:imum)?|less than|up to)\s*£?\s*(\d{1,5})/i,
-  );
-  if (match) {
-    return Number(match[1]) * 100;
-  }
-  return undefined;
+  if (asin) return `amz-${asin.toLowerCase()}`;
+  return `web-${createHash("sha1").update(url).digest("hex").slice(0, 12)}`;
 }
 
 function guessBrandAndName(title: string): { brand: string; name: string } {
   const cleaned = title
     .replace(/\s*[|–-]\s*(Amazon\.co\.uk|Argos|John Lewis|Currys).*$/i, "")
+    .replace(/^Amazon\.co\.uk\s*:\s*/i, "")
     .replace(/\s+/g, " ")
     .trim();
   const parts = cleaned.split(/\s+/);
-  const brand = parts[0] ?? "Unknown";
-  const name = (parts.slice(1, 8).join(" ") || cleaned).replace(/[\s,;:|–-]+$/, "");
-  return { brand, name };
+  return {
+    brand: parts[0] ?? "Unknown",
+    name: (parts.slice(1, 8).join(" ") || cleaned).replace(/[\s,;:|–-]+$/, ""),
+  };
 }
 
-type ListingDraft = {
-  canonicalUrl: string;
-  title: string;
+function withTimeout<T>(promise: Promise<T>, ms: number, fallback: T): Promise<T> {
+  return new Promise((resolve) => {
+    const timer = setTimeout(() => resolve(fallback), ms);
+    promise.then(
+      (value) => {
+        clearTimeout(timer);
+        resolve(value);
+      },
+      () => {
+        clearTimeout(timer);
+        resolve(fallback);
+      },
+    );
+  });
+}
+
+async function runWave(input: SourceQuery, deadline: number): Promise<ListingHit[]> {
+  const budget = Math.max(1_500, Math.min(8_000, deadline - Date.now()));
+  if (budget < 1_500) return [];
+  const batches = await Promise.all(
+    productSources().map((source) =>
+      withTimeout(source.search(input), budget, [] as ListingHit[]),
+    ),
+  );
+  return batches.flat();
+}
+
+type Candidate = ListingHit & { rank: number };
+
+type Screened = {
+  candidate: Candidate;
+  evaluation: Extract<ReturnType<typeof evaluateListing>, { relevant: true }>;
 };
 
-function collectDrafts(results: TavilyResult[]): ListingDraft[] {
-  const seen = new Set<string>();
-  const drafts: ListingDraft[] = [];
-  for (const result of results) {
-    if (!looksLikeListing(result)) {
-      continue;
-    }
-    const canonicalUrl = canonicalMerchantUrl(result.url);
-    const key = listingKey(canonicalUrl);
-    if (seen.has(key)) {
-      continue;
-    }
-    seen.add(key);
-    drafts.push({ canonicalUrl, title: result.title });
-    if (drafts.length >= 8) {
-      break;
-    }
-  }
-  return drafts;
+function screenCandidates(constraints: SearchConstraints, candidates: Candidate[]): Screened[] {
+  return candidates
+    .map((candidate) => ({
+      candidate,
+      evaluation: evaluateListing(constraints, candidate.title, candidate.pricePence),
+    }))
+    .filter((item): item is Screened => item.evaluation.relevant)
+    .sort((a, b) => b.evaluation.score - a.evaluation.score || a.candidate.rank - b.candidate.rank);
 }
 
-function productFromListing(
-  intent: string,
-  draft: ListingDraft,
+async function mapLimit<T, R>(items: T[], limit: number, run: (item: T) => Promise<R>): Promise<R[]> {
+  const results = new Array<R>(items.length);
+  let next = 0;
+  await Promise.all(
+    Array.from({ length: Math.min(limit, items.length) }, async () => {
+      while (next < items.length) {
+        const index = next++;
+        results[index] = await run(items[index]);
+      }
+    }),
+  );
+  return results;
+}
+
+function toProduct(
+  constraints: SearchConstraints,
+  candidate: Candidate,
   listing: VerifiedListing,
+  match: ProductMatch,
 ): Product {
-  const { brand, name } = guessBrandAndName(listing.title ?? draft.title);
+  const host = (() => {
+    try {
+      return new URL(candidate.url).hostname.replace(/^www\./, "");
+    } catch {
+      return candidate.sourceId;
+    }
+  })();
+  const { brand, name } = guessBrandAndName(listing.title ?? candidate.title);
   return {
-    id: productIdFromUrl(draft.canonicalUrl),
+    id: productIdFromUrl(candidate.url),
     name,
     brand,
     pricePence: listing.pricePence,
     currency: "GBP",
-    merchantUrl: draft.canonicalUrl,
-    imageUrl: listing.imageUrl,
+    merchantUrl: candidate.url,
+    imageUrl: listing.imageUrl ?? candidate.imageUrl,
     merchantRating: listing.rating,
     merchantReviewCount: listing.reviewCount,
-    category: intent.slice(0, 80),
+    category: constraints.product,
     attributes: {
-      sourceHost: hostnameOf(draft.canonicalUrl),
-      listedFrom: "live_web_search",
+      sourceHost: host,
+      listedFrom: candidate.sourceId,
       priceCheckedAt: listing.checkedAt,
     },
+    match,
   };
 }
 
-async function verifiedProducts(
+export type LiveSearchResult = {
+  constraints: SearchConstraints;
+  products: Product[];
+  similar: Product[];
+};
+
+export type SearchHooks = {
+  onConstraints?: (constraints: SearchConstraints) => void;
+  onProduct?: (product: Product) => void;
+};
+
+function listingKey(product: Product): string {
+  return `${product.brand} ${product.name}`.toLowerCase().replace(/[^a-z0-9]+/g, " ").trim();
+}
+
+export async function searchProductsLive(
   intent: string,
-  drafts: ListingDraft[],
-): Promise<Product[]> {
-  const listings = await Promise.all(
-    drafts.map((draft) => fetchVerifiedListing(draft.canonicalUrl)),
-  );
-  return drafts.flatMap((draft, index) => {
-    const listing = listings[index];
-    return listing ? [productFromListing(intent, draft, listing)] : [];
-  });
-}
-
-async function rankProducts(intent: string, products: Product[]): Promise<Product[]> {
-  if (products.length <= 4 || !hasLlmAccess()) {
-    return products.slice(0, 4);
-  }
-
-  try {
-    const payload = await completeJson(
-      "Pick up to 4 product IDs that best match the buyer intent. Do not change prices. Return JSON {\"ids\":[...]} using only provided ids.",
-      JSON.stringify({
-        intent,
-        products: products.map((product) => ({
-          id: product.id,
-          brand: product.brand,
-          name: product.name,
-          pricePence: product.pricePence,
-        })),
-      }),
+  hooks: SearchHooks = {},
+): Promise<LiveSearchResult> {
+  const constraints = await parseIntent(intent);
+  if (!constraints.product && !constraints.specificProduct) {
+    throw new SearchInputError(
+      "Tell me what product you're after — for example “wireless earbuds under £50”.",
     );
-    const ids =
-      payload &&
-      typeof payload === "object" &&
-      "ids" in payload &&
-      Array.isArray(payload.ids)
-        ? payload.ids.filter((id: unknown): id is string => typeof id === "string")
-        : [];
-    const picked = ids
-      .map((id) => products.find((product) => product.id === id))
-      .filter((product): product is Product => Boolean(product));
-    if (picked.length > 0) {
-      return picked.slice(0, 4);
-    }
-  } catch {
-    // Keep insertion order.
   }
-  return products.slice(0, 4);
-}
+  hooks.onConstraints?.(constraints);
 
-function dedupeProducts(products: Product[]): Product[] {
+  const deadline = Date.now() + SEARCH_WINDOW_MS;
+  const products: Product[] = [];
+  const similarProducts: Product[] = [];
   const seen = new Set<string>();
-  return products.filter((product) => {
-    if (seen.has(product.id)) {
-      return false;
-    }
-    seen.add(product.id);
-    return true;
-  });
-}
+  const seenUrls = new Set<string>();
+  let rank = 0;
 
-export async function searchProductsLive(intent: string): Promise<Product[]> {
-  const settled = await Promise.allSettled([
-    tavilySearch(`${intent} buy UK price`, {
-      maxResults: 8,
-      country: "united kingdom",
-      excludeDomains: [
-        "reddit.com",
-        "youtube.com",
-        "wikipedia.org",
-        "facebook.com",
-        "pinterest.com",
-      ],
-      timeoutMs: 14_000,
-    }),
-    // Tavily returns no results when `country` is combined with `includeDomains`.
-    tavilySearch(`${intent} UK price`, {
-      maxResults: 10,
-      includeDomains: ["amazon.co.uk"],
-      timeoutMs: 14_000,
-    }),
-    tavilySearch(intent, {
-      maxResults: 10,
-      includeDomains: ["amazon.co.uk"],
-      timeoutMs: 14_000,
-    }),
-  ]);
+  const accept = (product: Product | undefined) => {
+    if (!product) return;
+    const key = listingKey(product);
+    if (seen.has(key)) return;
+    const bucket = product.match?.kind === "similar" ? similarProducts : products;
+    if (bucket.length >= MAX_PER_SECTION) return;
+    seen.add(key);
+    bucket.push(product);
+    hooks.onProduct?.(product);
+  };
 
-  const results: TavilyResult[] = [];
-  for (const item of settled) {
-    if (item.status === "fulfilled") {
-      results.push(...item.value.results);
+  const takeHits = (hits: ListingHit[]): Candidate[] => {
+    const fresh: Candidate[] = [];
+    for (const hit of hits) {
+      const key = amazonAsin(hit.url) ?? hit.url;
+      if (!hit.title || seenUrls.has(key)) continue;
+      seenUrls.add(key);
+      fresh.push({ ...hit, rank: rank++ });
     }
+    return fresh;
+  };
+
+  const verify = (items: Screened[]) => {
+    const exact = items.filter((item) => item.evaluation.match.kind === "exact").slice(0, 10);
+    const similar = items.filter((item) => item.evaluation.match.kind === "similar").slice(0, 10);
+    return mapLimit([...exact, ...similar], VERIFY_CONCURRENCY, async ({ candidate }) => {
+      const listing = await fetchVerifiedListing(candidate.url, 8_000);
+      if (!listing) return;
+      const checked = evaluateListing(
+        constraints,
+        listing.title ?? candidate.title,
+        listing.pricePence,
+      );
+      if (!checked.relevant) return;
+      accept(toProduct(constraints, candidate, listing, checked.match));
+    });
+  };
+
+  const primary = constraints.specificProduct || searchPhrase(constraints);
+  const firstHits = takeHits(
+    await runWave(
+      {
+        query: primary,
+        specificProduct: constraints.specificProduct,
+        minPence: constraints.minPricePence,
+        maxPence: constraints.maxPricePence,
+      },
+      deadline,
+    ),
+  );
+  const firstScreened = screenCandidates(constraints, firstHits);
+  const firstPass = verify(firstScreened);
+
+  let secondScreened: Screened[] = [];
+  if (
+    (constraints.minPricePence !== undefined || constraints.maxPricePence !== undefined) &&
+    Date.now() < deadline - 2_000
+  ) {
+    const secondHits = takeHits(
+      await runWave({ query: primary, specificProduct: constraints.specificProduct }, deadline),
+    );
+    secondScreened = screenCandidates(constraints, secondHits);
+    await verify(secondScreened);
+  }
+  await firstPass;
+
+  if (products.length + similarProducts.length === 0 && firstScreened.length + secondScreened.length > 0) {
+    await new Promise((resolve) => setTimeout(resolve, 700));
+    await verify([...firstScreened, ...secondScreened].slice(0, 6));
   }
 
-  if (results.length === 0) {
-    const failed = settled.find((item) => item.status === "rejected");
-    if (failed && failed.status === "rejected") {
-      throw failed.reason instanceof Error
-        ? failed.reason
-        : new Error("Live product search returned no results.");
-    }
-    return [];
-  }
-
-  const drafts = collectDrafts(results);
-  const verified = await verifiedProducts(intent, drafts);
-  const budget = parseBudgetPence(intent);
-  const inBudget =
-    budget === undefined
-      ? verified
-      : verified.filter((product) => product.pricePence <= budget);
-
-  return rankProducts(intent, dedupeProducts(inBudget));
+  return { constraints, products, similar: similarProducts };
 }

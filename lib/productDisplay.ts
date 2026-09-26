@@ -2,6 +2,10 @@ import type { Product } from "@/types/contracts";
 
 const INTERNAL_ATTRIBUTES = new Set(["listedFrom", "priceCheckedAt", "sourceHost"]);
 
+export function formatPounds(pence: number): string {
+  return pence % 100 === 0 ? `£${pence / 100}` : `£${(pence / 100).toFixed(2)}`;
+}
+
 export function priceCheckLabel(product: Product): string {
   const checkedAt = product.attributes.priceCheckedAt;
   if (typeof checkedAt !== "string") {
@@ -12,6 +16,13 @@ export function priceCheckLabel(product: Product): string {
     minute: "2-digit",
   });
   return `Price read from merchant page at ${time} — may change`;
+}
+
+export function sourceNumber(sources: { url: string }[], url: string): number {
+  const index = sources.findIndex(
+    (source) => source.url === url || source.url.replace(/\/$/, "") === url.replace(/\/$/, ""),
+  );
+  return index >= 0 ? index + 1 : 1;
 }
 
 export function merchantHost(product: Product): string | undefined {

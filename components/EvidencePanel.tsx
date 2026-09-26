@@ -1,5 +1,6 @@
 "use client";
 
+import { sourceNumber } from "@/lib/productDisplay";
 import type { SocialProofAudit } from "@/types/contracts";
 
 type EvidencePanelProps = {
@@ -36,7 +37,7 @@ export function EvidencePanel({ audits }: EvidencePanelProps) {
                 {audit.pros.slice(0, 2).map((claim) => (
                   <li key={claim.text}>
                     {claim.text}{" "}
-                    {claim.evidenceUrls.map((url, index) => (
+                    {claim.evidenceUrls.map((url) => (
                       <a
                         key={url}
                         href={url}
@@ -44,7 +45,7 @@ export function EvidencePanel({ audits }: EvidencePanelProps) {
                         rel="noreferrer"
                         className="ml-1 text-[#7dd3c0] underline"
                       >
-                        [{index + 1}]
+                        [{sourceNumber(audit.sources, url)}]
                       </a>
                     ))}
                   </li>
@@ -59,7 +60,7 @@ export function EvidencePanel({ audits }: EvidencePanelProps) {
                 {audit.concerns.slice(0, 2).map((claim) => (
                   <li key={claim.text}>
                     {claim.text}{" "}
-                    {claim.evidenceUrls.map((url, index) => (
+                    {claim.evidenceUrls.map((url) => (
                       <a
                         key={url}
                         href={url}
@@ -67,7 +68,7 @@ export function EvidencePanel({ audits }: EvidencePanelProps) {
                         rel="noreferrer"
                         className="ml-1 text-[#7dd3c0] underline"
                       >
-                        [{index + 1}]
+                        [{sourceNumber(audit.sources, url)}]
                       </a>
                     ))}
                   </li>
