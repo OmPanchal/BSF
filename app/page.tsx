@@ -38,7 +38,13 @@ export default function Home() {
       }
       setProducts(data.products ?? []);
       if (!data.products?.length) {
-        setError("No products in this demo catalogue.");
+        setError(
+          typeof data.warning === "string"
+            ? data.warning
+            : "No buyable UK listings found for that request.",
+        );
+      } else if (typeof data.warning === "string") {
+        setError(data.warning);
       }
     } catch (caught) {
       setProducts([]);

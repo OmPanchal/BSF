@@ -26,6 +26,7 @@ export function ProductCard({ product, recommended }: ProductCardProps) {
           alt={`${product.brand} ${product.name}`}
           width={120}
           height={120}
+          unoptimized
           className="h-[120px] w-[120px] shrink-0 rounded-lg object-cover"
         />
       ) : null}
@@ -41,7 +42,13 @@ export function ProductCard({ product, recommended }: ProductCardProps) {
         <p className="mt-1 text-xl text-slate-100">
           {gbp.format(product.pricePence / 100)}
         </p>
-        <p className="mt-1 text-xs text-slate-500">Price snapshot — may change</p>
+        <p className="mt-1 text-xs text-slate-500">
+          {typeof product.attributes.priceCheckedAt === "string"
+            ? `Price read from the merchant page at ${new Date(
+                product.attributes.priceCheckedAt,
+              ).toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" })} — may change`
+            : "Price snapshot — may change"}
+        </p>
         {product.merchantRating !== undefined ? (
           <p className="mt-2 text-sm text-slate-400">
             Merchant rating {product.merchantRating.toFixed(1)}

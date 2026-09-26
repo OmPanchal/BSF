@@ -11,9 +11,15 @@ export function EvidencePanel({ audits }: EvidencePanelProps) {
     <section className="rounded-xl border border-[#2a3644] bg-[#1a222c] p-4">
       <div className="mb-3 flex flex-wrap items-center gap-2">
         <h2 className="text-lg font-semibold">Evidence</h2>
-        <span className="rounded-full border border-amber-400/40 bg-amber-400/10 px-2 py-0.5 text-xs font-medium text-amber-200">
-          Demo evidence snapshot
-        </span>
+        {audits.some((audit) => audit.mode === "demo_fixture") ? (
+          <span className="rounded-full border border-amber-400/40 bg-amber-400/10 px-2 py-0.5 text-xs font-medium text-amber-200">
+            Demo evidence snapshot
+          </span>
+        ) : (
+          <span className="rounded-full border border-[#7dd3c0]/40 bg-[#7dd3c0]/10 px-2 py-0.5 text-xs font-medium text-[#7dd3c0]">
+            Live sources
+          </span>
+        )}
       </div>
       <div className="grid gap-4 lg:grid-cols-2">
         {audits.map((audit) => (
