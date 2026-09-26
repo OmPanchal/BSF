@@ -1,0 +1,857 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0" name="viewport"/><meta content="web_standard" name="shell-type"/><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/><link href="https://fonts.googleapis.com" rel="preconnect"/><link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=JetBrains+Mono:wght@400;500;600&amp;family=Plus+Jakarta+Sans:wght@600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/><style>@layer base{html,body{margin:0;padding:0;}body{overscroll-behavior:none;}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}</style><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config={darkMode:"class",theme:{extend:{"colors":{"error":"#ffb4ab","secondary":"#ffb95f","on-primary-fixed-variant":"#004c69","surface-tint":"#7bd0ff","on-tertiary":"#68000a","surface-container":"#102034","inverse-primary":"#00668a","tertiary-fixed":"#ffdad7","on-error-container":"#ffdad6","on-background":"#d3e4fe","surface-container-lowest":"#000f21","surface-container-low":"#0b1c30","surface-container-high":"#1b2b3f","primary-fixed-dim":"#7bd0ff","surface":"#031427","on-error":"#690005","on-secondary-container":"#5b3800","inverse-surface":"#d3e4fe","outline":"#87929a","primary":"#8ed5ff","on-secondary-fixed-variant":"#653e00","on-tertiary-fixed-variant":"#930013","surface-variant":"#26364a","error-container":"#93000a","primary-container":"#38bdf8","surface-dim":"#031427","secondary-fixed-dim":"#ffb95f","secondary-container":"#ee9800","tertiary-fixed-dim":"#ffb3ad","secondary-fixed":"#ffddb8","primary-fixed":"#c4e7ff","on-surface-variant":"#bdc8d1","on-tertiary-container":"#8d0012","background":"#031427","tertiary-container":"#ff938c","inverse-on-surface":"#213145","surface-bright":"#2a3a4f","on-primary-container":"#004965","on-surface":"#d3e4fe","on-tertiary-fixed":"#410004","on-primary":"#00354a","on-secondary":"#472a00","outline-variant":"#3e484f","tertiary":"#ffbcb7","surface-container-highest":"#26364a","on-secondary-fixed":"#2a1700","on-primary-fixed":"#001e2c"},"borderRadius":{"DEFAULT":"0.125rem","lg":"0.25rem","xl":"0.5rem","full":"0.75rem"},"spacing":{"margin-md":"1.5rem","space-sm":"0.5rem","space-xs":"0.25rem","space-xl":"2.5rem","gutter-lg":"1.5rem","space-md":"1rem","margin-lg":"2.5rem","gutter":"1rem","space-lg":"1.5rem","margin":"1rem"},"fontFamily":{"label-mono":["JetBrains Mono"],"label-mono-xs":["JetBrains Mono"],"body-md":["Inter"],"headline-lg":["Plus Jakarta Sans"],"body-lg":["Inter"],"headline-xl":["Plus Jakarta Sans"],"headline-sm":["Plus Jakarta Sans"],"body-sm":["Inter"],"headline-xl-mobile":["Plus Jakarta Sans"]},"fontSize":{"label-mono":["12px",{"lineHeight":"16px","fontWeight":"500"}],"label-mono-xs":["10px",{"lineHeight":"14px","fontWeight":"400"}],"body-md":["14px",{"lineHeight":"20px","fontWeight":"400"}],"headline-lg":["24px",{"lineHeight":"32px","fontWeight":"600"}],"body-lg":["16px",{"lineHeight":"24px","fontWeight":"400"}],"headline-xl":["32px",{"lineHeight":"40px","fontWeight":"700"}],"headline-sm":["18px",{"lineHeight":"24px","fontWeight":"600"}],"body-sm":["12px",{"lineHeight":"16px","fontWeight":"400"}],"headline-xl-mobile":["26px",{"lineHeight":"34px","fontWeight":"700"}]}}}}</script></head><body class="bg-surface font-body-md text-on-surface antialiased selection:bg-primary-container selection:text-on-primary-container"><header class="fixed top-0 w-full z-50 bg-surface/90 backdrop-blur-xl shadow-[0_1px_8px_rgba(0,0,0,0.25)]"><div class="h-16 w-full px-margin-lg flex items-center justify-between gap-space-md"><div class="flex items-center gap-space-lg"><div class="flex items-center gap-space-sm"><div class="w-7 h-7 rounded bg-primary flex items-center justify-center"><span class="material-symbols-outlined text-on-primary text-[18px]">verified_user</span></div><span class="font-headline-sm text-headline-sm text-primary font-bold tracking-tight">GrokTruth</span></div><div class="hidden xl:flex items-center gap-space-xs px-space-sm py-space-xs rounded bg-surface-container-high"><span class="w-2 h-2 rounded-full bg-secondary-container animate-pulse"></span><span class="font-label-mono text-label-mono text-secondary">Buyer Mode · Human Approval Required</span></div></div><nav class="hidden lg:flex items-center gap-space-xs p-space-xs rounded-lg bg-surface-container-low" data-active-classes="bg-primary-container text-on-primary-container font-semibold rounded-lg"><a aria-current="page" class="px-space-md py-space-xs transition-colors bg-primary-container text-on-primary-container font-semibold rounded-lg" data-path="verification-matrix" href="#">Verification Matrix</a><a class="px-space-md py-space-xs text-on-surface-variant hover:text-on-surface transition-colors font-body-sm text-body-sm" data-path="forensic-ledger" href="#">Forensic Ledger</a><a class="px-space-md py-space-xs text-on-surface-variant hover:text-on-surface transition-colors font-body-sm text-body-sm" data-path="agent-workflow" href="#">Agent Workflow</a><a class="px-space-md py-space-xs text-on-surface-variant hover:text-on-surface transition-colors font-body-sm text-body-sm" data-path="contract-spec" href="#">Contract Spec</a></nav><div class="flex items-center gap-space-md"><div class="hidden sm:flex items-center gap-space-xs px-space-sm py-space-xs rounded bg-surface-container-low"><span class="material-symbols-outlined text-[14px] text-primary">description</span><span class="font-label-mono-xs text-label-mono-xs text-on-surface-variant">types/contracts.ts aligned</span></div><div class="flex items-center p-space-xs rounded bg-surface-container-low"><button class="px-space-sm py-space-xs rounded font-label-mono-xs text-label-mono-xs bg-primary-container text-on-primary-container font-semibold" type="button">Demo Fixtures</button><button class="px-space-sm py-space-xs rounded font-label-mono-xs text-label-mono-xs text-on-surface-variant hover:text-on-surface transition-colors" type="button">Live API</button></div><div class="flex items-center gap-space-xs px-space-sm py-space-xs rounded bg-surface-container-high"><span class="material-symbols-outlined text-[16px] text-secondary">timer</span><span class="font-label-mono text-label-mono text-on-surface">02:48</span></div><div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center"><span class="material-symbols-outlined text-on-primary text-[18px]">person</span></div></div></div></header><main class="w-full pt-16 bg-surface min-h-[calc(100vh-64px)]"><div class="flex flex-col w-full">
+<!-- Interactive Workbench State & Controller Script -->
+<script>
+    window.grokState = {
+      activeTab: 'B', // 'A', 'B', 'C'
+      demoStep: 3,    // 1 to 4
+      modalOpen: false,
+      jsonModalOpen: false,
+      authorized: false,
+      investigating: false
+    };
+
+    function setCandidate(id) {
+      window.grokState.activeTab = id;
+      document.querySelectorAll('.candidate-card').forEach(el => {
+        el.classList.remove('bg-surface-container-highest', 'shadow-[0_0_0_2px_#38bdf8]', 'shadow-primary/20');
+        el.classList.add('bg-surface-container');
+      });
+      const selected = document.getElementById('card-' + id);
+      if (selected) {
+        selected.classList.remove('bg-surface-container');
+        selected.classList.add('bg-surface-container-highest', 'shadow-[0_0_0_2px_#38bdf8]');
+      }
+
+      // Update Evidence Panel Tab Views
+      document.querySelectorAll('.evidence-view').forEach(v => v.classList.add('hidden'));
+      const activeEvidence = document.getElementById('evidence-' + id);
+      if (activeEvidence) activeEvidence.classList.remove('hidden');
+
+      // Update quick tab pills in right pane
+      ['A', 'B', 'C'].forEach(key => {
+        const btn = document.getElementById('tab-btn-' + key);
+        if (btn) {
+          if (key === id) {
+            btn.classList.add('bg-primary', 'text-on-primary', 'font-semibold');
+            btn.classList.remove('text-on-surface-variant', 'bg-surface-container-high');
+          } else {
+            btn.classList.remove('bg-primary', 'text-on-primary', 'font-semibold');
+            btn.classList.add('text-on-surface-variant', 'bg-surface-container-high');
+          }
+        }
+      });
+    }
+
+    function toggleApprovalModal(open) {
+      window.grokState.modalOpen = open;
+      const modal = document.getElementById('approval-modal');
+      if (open) {
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+      } else {
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+      }
+    }
+
+    function toggleJsonModal(open) {
+      const modal = document.getElementById('json-modal');
+      if (open) {
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+      } else {
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+      }
+    }
+
+    function triggerAuthorizePurchase() {
+      const btn = document.getElementById('auth-submit-btn');
+      const banner = document.getElementById('handoff-confirmed-banner');
+      btn.innerHTML = `<span class="material-symbols-outlined text-[16px] animate-spin">progress_activity</span> Signing Merchant Payload...`;
+      setTimeout(() => {
+        btn.innerHTML = `<span class="material-symbols-outlined text-[16px]">check_circle</span> Dispatched to SoundCore UK`;
+        btn.classList.remove('bg-primary-container', 'text-on-primary-container');
+        btn.classList.add('bg-surface-bright', 'text-primary');
+        banner.classList.remove('hidden');
+        document.getElementById('floating-bar-status').innerHTML = `<span class="inline-flex items-center gap-space-xs text-primary font-label-mono text-label-mono"><span class="w-2 h-2 rounded-full bg-primary animate-ping"></span> Handoff Token Generated · Ready for Checkout</span>`;
+      }, 700);
+    }
+
+    function simulateReInvestigation() {
+      const btn = document.getElementById('re-investigate-btn');
+      const badge = document.getElementById('investigation-pulse');
+      btn.innerHTML = `<span class="material-symbols-outlined text-[14px] animate-spin">sync</span> Auditing 42 Forums...`;
+      badge.classList.remove('bg-primary');
+      badge.classList.add('bg-secondary');
+      setTimeout(() => {
+        btn.innerHTML = `<span class="material-symbols-outlined text-[14px]">done_all</span> Audit Synchronized`;
+        badge.classList.remove('bg-secondary');
+        badge.classList.add('bg-primary');
+        setTimeout(() => {
+          btn.innerHTML = `<span class="material-symbols-outlined text-[14px]">bolt</span> Investigate Candidates`;
+        }, 1800);
+      }, 950);
+    }
+  </script>
+<!-- Top System Header: Title, Scope & 4-Step Interactive Flow -->
+<section class="w-full px-margin-lg py-space-md bg-surface-container-lowest">
+<div class="max-w-[1720px] mx-auto flex flex-col xl:flex-row xl:items-center justify-between gap-space-md">
+<!-- Title & Epistemic Scope -->
+<div class="flex flex-col gap-space-xs">
+<div class="flex items-center gap-space-sm flex-wrap">
+<span class="font-headline-lg text-headline-lg tracking-tight font-bold text-on-surface">GrokTruth Forensic Workbench</span>
+<span class="px-space-sm py-space-xs rounded bg-surface-container-high text-primary font-label-mono text-label-mono flex items-center gap-space-xs">
+<span class="w-2 h-2 rounded-full bg-primary" id="investigation-pulse"></span>
+            Snapshot Mode: demo_fixture_v2
+          </span>
+<span class="px-space-sm py-space-xs rounded bg-surface-variant font-label-mono-xs text-label-mono-xs text-on-surface-variant">
+            Zero-Arbitrary Trust Protocol
+          </span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant max-w-2xl">
+          Independent evidence verification for autonomous shopping agents. Audits synthetic merchant reviews against authentic runner forum telemetry, physical teardowns, and acoustic defect clusters.
+        </p>
+</div>
+<!-- 4-Stage 3-Minute Demo Progress Matrix -->
+<div class="bg-surface-container-low p-space-xs rounded-xl flex items-center gap-space-xs overflow-x-auto">
+<!-- Step 1 -->
+<div class="flex items-center gap-space-xs px-space-sm py-space-xs rounded bg-surface-container text-on-surface-variant">
+<span class="w-5 h-5 rounded-full bg-surface-bright flex items-center justify-center font-label-mono-xs text-label-mono-xs font-bold text-primary">01</span>
+<div class="flex flex-col">
+<span class="font-label-mono-xs text-label-mono-xs font-semibold text-on-surface">Intent Input</span>
+<span class="font-label-mono-xs text-label-mono-xs text-on-surface-variant">£100 cap · Sport</span>
+</div>
+</div>
+<span class="material-symbols-outlined text-[14px] text-outline">chevron_right</span>
+<!-- Step 2 -->
+<div class="flex items-center gap-space-xs px-space-sm py-space-xs rounded bg-surface-container text-on-surface-variant">
+<span class="w-5 h-5 rounded-full bg-surface-bright flex items-center justify-center font-label-mono-xs text-label-mono-xs font-bold text-primary">02</span>
+<div class="flex flex-col">
+<span class="font-label-mono-xs text-label-mono-xs font-semibold text-on-surface">Evidence Audit</span>
+<span class="font-label-mono-xs text-label-mono-xs text-on-surface-variant">Reddit + Head-Fi</span>
+</div>
+</div>
+<span class="material-symbols-outlined text-[14px] text-outline">chevron_right</span>
+<!-- Step 3 (Active) -->
+<div class="flex items-center gap-space-xs px-space-sm py-space-xs rounded bg-primary-container text-on-primary-container shadow-sm">
+<span class="w-5 h-5 rounded-full bg-on-primary-container text-primary flex items-center justify-center font-label-mono-xs text-label-mono-xs font-bold">03</span>
+<div class="flex flex-col">
+<span class="font-label-mono-xs text-label-mono-xs font-semibold">Decision Flaw Check</span>
+<span class="font-label-mono-xs text-label-mono-xs opacity-80">AuraPro Fit Disqualified</span>
+</div>
+</div>
+<span class="material-symbols-outlined text-[14px] text-outline">chevron_right</span>
+<!-- Step 4 -->
+<button class="flex items-center gap-space-xs px-space-sm py-space-xs rounded bg-surface-container-high text-secondary hover:bg-surface-bright transition-colors cursor-pointer" onclick="toggleApprovalModal(true)">
+<span class="w-5 h-5 rounded-full bg-secondary-container/30 text-secondary flex items-center justify-center font-label-mono-xs text-label-mono-xs font-bold">04</span>
+<div class="flex flex-col text-left">
+<span class="font-label-mono-xs text-label-mono-xs font-semibold text-secondary">Human Authorization</span>
+<span class="font-label-mono-xs text-label-mono-xs text-on-surface-variant">Checkout handoff</span>
+</div>
+</button>
+</div>
+</div>
+</section>
+<!-- Intent Formulation Console (IntentBar.tsx equivalent) -->
+<section class="w-full px-margin-lg py-space-sm bg-surface-container-low shadow-sm">
+<div class="max-w-[1720px] mx-auto flex flex-col md:flex-row items-stretch md:items-center justify-between gap-space-md">
+<!-- Prompt Formulation -->
+<div class="flex-1 flex flex-col sm:flex-row items-stretch sm:items-center gap-space-sm">
+<div class="flex items-center gap-space-xs text-primary shrink-0">
+<span class="material-symbols-outlined text-[18px]">terminal</span>
+<span class="font-label-mono text-label-mono uppercase tracking-wider text-on-surface">Agent Intent:</span>
+</div>
+<div class="flex-1 relative flex items-center">
+<input class="w-full bg-surface-container-lowest text-on-surface font-label-mono text-label-mono px-space-md py-space-xs rounded text-ellipsis focus:outline-none focus:bg-surface-container" readonly="" type="text" value="Workout earbuds under £100; prioritise secure fit and sweat resistance."/>
+<span class="hidden lg:inline-flex items-center gap-space-xs absolute right-space-sm px-space-xs py-0.5 rounded bg-surface-variant text-on-surface-variant font-label-mono-xs text-label-mono-xs">
+<span class="material-symbols-outlined text-[12px] text-primary">lock</span> constraints_enforced
+          </span>
+</div>
+</div>
+<!-- Seed Badges & Action Trigger -->
+<div class="flex items-center gap-space-sm flex-wrap shrink-0">
+<div class="flex items-center gap-space-xs px-space-sm py-space-xs rounded bg-surface-container-high font-label-mono text-label-mono">
+<span class="text-on-surface-variant">CEILING:</span>
+<span class="text-secondary font-semibold">Max £100.00</span>
+</div>
+<div class="flex items-center gap-space-xs px-space-sm py-space-xs rounded bg-surface-container-high font-label-mono text-label-mono">
+<span class="text-on-surface-variant">PRIMARY VETO:</span>
+<span class="text-error font-semibold">Casing Slip / IPX Flaw</span>
+</div>
+<button class="flex items-center gap-space-xs px-space-md py-space-xs rounded font-label-mono text-label-mono bg-primary text-on-primary hover:bg-primary-container hover:text-on-primary-container transition-all cursor-pointer font-semibold shadow-sm" id="re-investigate-btn" onclick="simulateReInvestigation()" type="button">
+<span class="material-symbols-outlined text-[16px]">bolt</span>
+          Investigate Candidates
+        </button>
+</div>
+</div>
+</section>
+<!-- Main Tri-Pane Forensic Layout (12-Column Responsive Split Workbench) -->
+<main class="w-full px-margin-lg py-space-lg flex-1">
+<div class="max-w-[1720px] mx-auto grid grid-cols-1 lg:grid-cols-12 gap-space-lg">
+<!-- LEFT COLUMN: Agent Workflow Scratchpad & Telemetry (3 cols) -->
+<div class="lg:col-span-3 flex flex-col gap-space-md">
+<!-- Agent State Widget -->
+<div class="bg-surface-container rounded-xl p-space-md flex flex-col gap-space-md shadow-sm">
+<div class="flex items-center justify-between pb-space-xs">
+<div class="flex items-center gap-space-xs">
+<span class="material-symbols-outlined text-primary text-[18px]">account_tree</span>
+<span class="font-headline-sm text-headline-sm text-on-surface">Agent Workflow</span>
+</div>
+<span class="font-label-mono-xs text-label-mono-xs px-space-xs py-0.5 rounded bg-surface-container-high text-primary">LIVE_STREAM</span>
+</div>
+<div class="p-space-xs rounded bg-surface-container-lowest text-on-surface-variant font-label-mono-xs text-label-mono-xs flex items-center justify-between">
+<span>Model: Grok-Forensic-v2</span>
+<span class="text-secondary">Latency: 3.5s total</span>
+</div>
+<!-- Chronological Step Telemetry (AgentTimeline.tsx equivalent) -->
+<div class="relative flex flex-col gap-space-md pl-space-sm">
+<!-- Continuous track line -->
+<div class="absolute left-2.5 top-2 bottom-2 w-0.5 bg-surface-container-high"></div>
+<!-- Step 1 -->
+<div class="relative flex items-start gap-space-sm">
+<div class="w-5 h-5 rounded-full bg-surface-container-highest flex items-center justify-center shrink-0 z-10 text-primary">
+<span class="material-symbols-outlined text-[12px]">check</span>
+</div>
+<div class="flex flex-col">
+<div class="flex items-center gap-space-xs">
+<span class="font-label-mono-xs text-label-mono-xs text-primary font-semibold">[T+0.4s]</span>
+<span class="font-label-mono-xs text-label-mono-xs text-on-surface font-medium">Parse Constraints</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant mt-0.5">Budget ≤ £100.00; requirement: mechanical wingtips, sweat IPX rating.</p>
+</div>
+</div>
+<!-- Step 2 -->
+<div class="relative flex items-start gap-space-sm">
+<div class="w-5 h-5 rounded-full bg-surface-container-highest flex items-center justify-center shrink-0 z-10 text-primary">
+<span class="material-symbols-outlined text-[12px]">check</span>
+</div>
+<div class="flex flex-col">
+<div class="flex items-center gap-space-xs">
+<span class="font-label-mono-xs text-label-mono-xs text-primary font-semibold">[T+1.2s]</span>
+<span class="font-label-mono-xs text-label-mono-xs text-on-surface font-medium">Catalog Query</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant mt-0.5">3 commercial candidates matched pricing bounds (£39 - £89.99).</p>
+</div>
+</div>
+<!-- Step 3 -->
+<div class="relative flex items-start gap-space-sm">
+<div class="w-5 h-5 rounded-full bg-surface-container-highest flex items-center justify-center shrink-0 z-10 text-primary">
+<span class="material-symbols-outlined text-[12px]">search_check</span>
+</div>
+<div class="flex flex-col">
+<div class="flex items-center gap-space-xs">
+<span class="font-label-mono-xs text-label-mono-xs text-primary font-semibold">[T+2.1s]</span>
+<span class="font-label-mono-xs text-label-mono-xs text-on-surface font-medium">External Corpus Ingestion</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant mt-0.5">Cross-referenced 42 independent forum threads on Reddit &amp; Head-Fi.</p>
+</div>
+</div>
+<!-- Step 4 (Warning Triggered) -->
+<div class="relative flex items-start gap-space-sm">
+<div class="w-5 h-5 rounded-full bg-secondary-container/20 text-secondary flex items-center justify-center shrink-0 z-10">
+<span class="material-symbols-outlined text-[12px]">priority_high</span>
+</div>
+<div class="flex flex-col">
+<div class="flex items-center gap-space-xs">
+<span class="font-label-mono-xs text-label-mono-xs text-secondary font-semibold">[T+2.8s]</span>
+<span class="font-label-mono-xs text-label-mono-xs text-secondary font-medium">Discrepancy Flagged</span>
+</div>
+<p class="font-body-sm text-body-sm text-error mt-0.5">AuraPulse Pro (4.8★ store score) exhibits 34% forum slippage complaints.</p>
+</div>
+</div>
+<!-- Step 5 -->
+<div class="relative flex items-start gap-space-sm">
+<div class="w-5 h-5 rounded-full bg-primary-container text-on-primary-container flex items-center justify-center shrink-0 z-10">
+<span class="material-symbols-outlined text-[12px]">task_alt</span>
+</div>
+<div class="flex flex-col">
+<div class="flex items-center gap-space-xs">
+<span class="font-label-mono-xs text-label-mono-xs text-primary font-semibold">[T+3.2s]</span>
+<span class="font-label-mono-xs text-label-mono-xs text-on-surface font-medium">Candidate Decision</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant mt-0.5">SoundCore Apex (£74.50) satisfies fit criteria. Leaves £25.50 buffer.</p>
+</div>
+</div>
+<!-- Step 6 (Human Gate) -->
+<div class="relative flex items-start gap-space-sm">
+<div class="w-5 h-5 rounded-full bg-secondary text-on-secondary flex items-center justify-center shrink-0 z-10 animate-pulse">
+<span class="material-symbols-outlined text-[12px]">pan_tool</span>
+</div>
+<div class="flex flex-col">
+<div class="flex items-center gap-space-xs">
+<span class="font-label-mono-xs text-label-mono-xs text-secondary font-semibold">[T+3.5s]</span>
+<span class="font-label-mono-xs text-label-mono-xs text-secondary font-medium">Intervention Gate</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant mt-0.5">Awaiting human sign-off prior to checkout handoff.</p>
+</div>
+</div>
+</div>
+<!-- Honest Architecture Footnote -->
+<div class="mt-space-sm p-space-sm rounded bg-surface-container-low flex flex-col gap-space-xs text-on-surface-variant">
+<span class="font-label-mono-xs text-label-mono-xs uppercase text-primary font-semibold">Integrity Protocol</span>
+<p class="font-label-mono-xs text-label-mono-xs leading-relaxed">
+              Deterministic verification ledger. All evidence weights, thread IDs, and extract quotes are cryptographically signed.
+            </p>
+</div>
+</div>
+<!-- Budget & Financial Allocation Meter -->
+<div class="bg-surface-container rounded-xl p-space-md flex flex-col gap-space-sm shadow-sm">
+<span class="font-label-mono text-label-mono text-on-surface uppercase tracking-wide">Financial Constraint Envelope</span>
+<div class="flex items-baseline justify-between">
+<span class="font-headline-sm text-headline-sm font-bold text-on-surface">£74.50 <span class="font-body-sm text-body-sm text-on-surface-variant font-normal">/ £100.00</span></span>
+<span class="font-label-mono text-label-mono text-primary font-semibold">£25.50 Buffer Saved</span>
+</div>
+<div class="w-full bg-surface-container-high rounded-full h-2 overflow-hidden flex">
+<div class="bg-primary h-full" style="width: 74.5%"></div>
+<div class="bg-surface-bright h-full" style="width: 25.5%"></div>
+</div>
+<div class="flex justify-between font-label-mono-xs text-label-mono-xs text-on-surface-variant">
+<span>SoundCore Apex (74.5%)</span>
+<span>Unallocated Headroom (25.5%)</span>
+</div>
+</div>
+</div>
+<!-- CENTER COLUMN: Candidate Products Grid & Verification Matrix (5 cols) -->
+<div class="lg:col-span-5 flex flex-col gap-space-md">
+<!-- Matrix Header -->
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-space-sm">
+<span class="font-headline-sm text-headline-sm text-on-surface font-bold">Candidate Evaluation</span>
+<span class="px-space-xs py-0.5 rounded bg-surface-container text-on-surface-variant font-label-mono-xs text-label-mono-xs">3 Loaded</span>
+</div>
+<div class="flex items-center gap-space-xs text-on-surface-variant font-label-mono-xs text-label-mono-xs">
+<span class="material-symbols-outlined text-[14px]">tune</span>
+<span>Normalized: en-GB (£ GBP)</span>
+</div>
+</div>
+<!-- Candidate Cards Stack (ProductCard.tsx equivalent) -->
+<div class="flex flex-col gap-space-md">
+<!-- CANDIDATE B (The Agent Selected Winner) -->
+<div class="candidate-card bg-surface-container-highest shadow-[0_0_0_2px_#38bdf8] rounded-xl p-space-md flex flex-col gap-space-sm cursor-pointer transition-all hover:bg-surface-bright relative" id="card-B" onclick="setCandidate('B')">
+<!-- Badge & Confidence Ribbon -->
+<div class="flex items-center justify-between flex-wrap gap-space-xs">
+<span class="px-space-sm py-space-xs rounded bg-primary text-on-primary font-label-mono text-label-mono font-bold flex items-center gap-space-xs shadow-sm">
+<span class="material-symbols-outlined text-[14px]">verified</span>
+                AGENT RECOMMENDED SELECTION
+              </span>
+<span class="font-label-mono-xs text-label-mono-xs text-primary font-semibold bg-surface-container-lowest px-space-sm py-space-xs rounded">
+                Audit Confidence: 91.4%
+              </span>
+</div>
+<!-- Card Content Body -->
+<div class="flex flex-col sm:flex-row items-start sm:items-center gap-space-md pt-space-xs">
+<!-- Visual Placeholder with Rich Prompt -->
+<div class="relative w-24 h-24 sm:w-28 sm:h-28 rounded-lg overflow-hidden shrink-0 bg-surface-container-lowest">
+<img class="w-full h-full object-cover" data-alt="Matte black high performance sports workout earbuds with secure ergonomic silicone ear-wings and ribbed sweat channels, isolated on a dark metallic engineering laboratory tabletop with subtle cyan rim lighting, crisp technical detail, studio photography." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBhZBQae2gb_PJ7xhq-PBTFeibf2Tnw55irgPg1tn5C2IduHEi-tEFGROSx-H6ySm9vhDCwvo580HAVg2V6mcj46PJIlJc7KZ0k2nkqRQWbYIg1taB26dTc_dHwLhBOgRlELF2_dGU5BY4E5DqnSrpsA-VBKTWz-sT2bFt2FDLr-lr-G2N27XGKmAZD3rHKij_Rh6FtVPBcbDNKmkB4k6xennM01J11hhxUXlKe1_dBQwS6XghetvaNwQ"/>
+<span class="absolute bottom-1 right-1 font-label-mono-xs text-label-mono-xs bg-surface-container-lowest/90 px-1 py-0.5 rounded text-primary">IPX7</span>
+</div>
+<!-- Product Details -->
+<div class="flex-1 flex flex-col gap-space-xs">
+<div class="flex items-baseline justify-between">
+<h3 class="font-headline-sm text-headline-sm font-bold text-on-surface">SoundCore Apex Sport</h3>
+<span class="font-label-mono text-headline-sm font-bold text-primary">£74.50</span>
+</div>
+<div class="flex items-center gap-space-md font-label-mono-xs text-label-mono-xs text-on-surface-variant">
+<span>Merchant: 4.5 ★ (840 reviews)</span>
+<span class="text-primary font-semibold">Forum Audit: 4.8 / 5.0 Equiv.</span>
+</div>
+<!-- Forensic Assertion Pill -->
+<div class="mt-space-xs p-space-xs rounded bg-surface-container-low flex items-center gap-space-xs text-on-surface">
+<span class="material-symbols-outlined text-[16px] text-primary shrink-0">verified</span>
+<span class="font-body-sm text-body-sm text-primary font-medium">Verified IPX7 &amp; Wingtip Mechanical Stability</span>
+</div>
+</div>
+</div>
+<!-- Metric Telemetry Micro-Grid -->
+<div class="grid grid-cols-3 gap-space-xs pt-space-xs font-label-mono-xs text-label-mono-xs">
+<div class="bg-surface-container-low p-space-xs rounded flex flex-col">
+<span class="text-on-surface-variant">Sweat Retention</span>
+<span class="text-primary font-bold">98.2% Positive</span>
+</div>
+<div class="bg-surface-container-low p-space-xs rounded flex flex-col">
+<span class="text-on-surface-variant">Budget Delta</span>
+<span class="text-on-surface font-bold">-£25.50 under max</span>
+</div>
+<div class="bg-surface-container-low p-space-xs rounded flex flex-col">
+<span class="text-on-surface-variant">Forum Citations</span>
+<span class="text-on-surface font-bold">24 threads audited</span>
+</div>
+</div>
+</div>
+<!-- CANDIDATE A (The Deceptive Store Favorite - Disqualified by Agent) -->
+<div class="candidate-card bg-surface-container rounded-xl p-space-md flex flex-col gap-space-sm cursor-pointer transition-all hover:bg-surface-bright relative" id="card-A" onclick="setCandidate('A')">
+<!-- Badge & Disqualification Ribbon -->
+<div class="flex items-center justify-between flex-wrap gap-space-xs">
+<span class="px-space-sm py-space-xs rounded bg-secondary-container text-on-secondary-container font-label-mono text-label-mono font-bold flex items-center gap-space-xs shadow-sm">
+<span class="material-symbols-outlined text-[14px]">warning</span>
+                STORE TOP PICK · DEFECT DETECTED
+              </span>
+<span class="font-label-mono-xs text-label-mono-xs text-error font-semibold bg-surface-container-lowest px-space-sm py-space-xs rounded">
+                High Forum Return Rate
+              </span>
+</div>
+<!-- Card Content Body -->
+<div class="flex flex-col sm:flex-row items-start sm:items-center gap-space-md pt-space-xs">
+<!-- Visual Placeholder with Rich Prompt -->
+<div class="relative w-24 h-24 sm:w-28 sm:h-28 rounded-lg overflow-hidden shrink-0 bg-surface-container-lowest">
+<img class="w-full h-full object-cover opacity-80" data-alt="Sleek glossy white wireless earbuds in an open high-end charging case, resting on a reflective glass surface, minimalist luxury consumer product aesthetic with high specular highlights, soft studio lighting." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAouq_zPRK4ttIzkahTHaW1f8L6Ozyn78g2vZA0wVglqvHirtOb_GPJHeYUmFrXmXPXszh36nHxFWL6bzS3nbrZm86nkF6-eEF1dZp6L9fdGDmjnNtA0OBeEVsey4qph5jjpPxuGXwzmPuS8is-jql-xl2850I0tjn76FqXs_E2Kr1VohnNmfOmhcCZvPdmagxHJwgqVrJlQuXYRwZLe_p3Lv0_kXT3-_Tohq8MCd5MF1lgxoBvFy_2oA"/>
+<span class="absolute bottom-1 right-1 font-label-mono-xs text-label-mono-xs bg-surface-container-lowest/90 px-1 py-0.5 rounded text-secondary">No Wings</span>
+</div>
+<!-- Product Details -->
+<div class="flex-1 flex flex-col gap-space-xs">
+<div class="flex items-baseline justify-between">
+<h3 class="font-headline-sm text-headline-sm font-bold text-on-surface">AuraPulse Pro Wireless</h3>
+<span class="font-label-mono text-headline-sm font-bold text-on-surface">£89.99</span>
+</div>
+<div class="flex items-center gap-space-md font-label-mono-xs text-label-mono-xs text-on-surface-variant">
+<span class="text-secondary font-medium">Merchant: 4.8 ★ (1,420 reviews)</span>
+<span class="text-error font-semibold">Forum Audit: 2.1 / 5.0 (Gym)</span>
+</div>
+<!-- Forensic Assertion Pill (Amber Warning) -->
+<div class="mt-space-xs p-space-xs rounded bg-surface-container-low flex items-center gap-space-xs text-secondary">
+<span class="material-symbols-outlined text-[16px] text-secondary shrink-0">report_problem</span>
+<span class="font-body-sm text-body-sm font-medium">Critical Fit Flaw: Wingless design slips during sweat workouts</span>
+</div>
+</div>
+</div>
+<!-- Metric Telemetry Micro-Grid -->
+<div class="grid grid-cols-3 gap-space-xs pt-space-xs font-label-mono-xs text-label-mono-xs">
+<div class="bg-surface-container-low p-space-xs rounded flex flex-col">
+<span class="text-on-surface-variant">Store Star Bias</span>
+<span class="text-secondary font-bold">+2.7★ Skewed</span>
+</div>
+<div class="bg-surface-container-low p-space-xs rounded flex flex-col">
+<span class="text-on-surface-variant">Static ANC Score</span>
+<span class="text-on-surface font-bold">9.2/10 (Desk)</span>
+</div>
+<div class="bg-surface-container-low p-space-xs rounded flex flex-col">
+<span class="text-on-surface-variant">Sweat Retention</span>
+<span class="text-error font-bold">41% Failure Rate</span>
+</div>
+</div>
+</div>
+<!-- CANDIDATE C (Budget Baseline) -->
+<div class="candidate-card bg-surface-container rounded-xl p-space-md flex flex-col gap-space-sm cursor-pointer transition-all hover:bg-surface-bright relative opacity-85" id="card-C" onclick="setCandidate('C')">
+<div class="flex items-center justify-between flex-wrap gap-space-xs">
+<span class="px-space-sm py-space-xs rounded bg-surface-container-high text-on-surface-variant font-label-mono text-label-mono flex items-center gap-space-xs">
+<span class="material-symbols-outlined text-[14px]">info</span>
+                BUDGET BASELINE CANDIDATE
+              </span>
+<span class="font-label-mono-xs text-label-mono-xs text-on-surface-variant bg-surface-container-lowest px-space-sm py-space-xs rounded">
+                Audit Confidence: 54.0%
+              </span>
+</div>
+<div class="flex flex-col sm:flex-row items-start sm:items-center gap-space-md pt-space-xs">
+<div class="relative w-24 h-24 sm:w-28 sm:h-28 rounded-lg overflow-hidden shrink-0 bg-surface-container-lowest">
+<img class="w-full h-full object-cover opacity-70" data-alt="Entry-level compact plastic sports earbuds in a translucent charging case, clean dark industrial studio shot, cool grey and navy accents, unbranded aesthetic." src="https://lh3.googleusercontent.com/aida-public/AB6AXuA8IJE8w4d1KiVE6tJOhrHRQeOFs9nInYoF2Ca0oxaHMyGGg0gFqlj8XrHIqNFK0dtUbcGKCun28imn58AFZd5bVYSO7rpZgsfnA33v0ppRyqoFf6Cx02xu6gQ0lw_a-DexNpxy5eJganVqEQoRBJoY8cFOfVvGVKLs56E1un5kikLLz-sgP-6LkJUIDsNydqNLEuiDj9ANk_kE6wF4A3LoP_NZk9VxQB5iFrhoY5DtHxiO3JA8Dngeqw"/>
+<span class="absolute bottom-1 right-1 font-label-mono-xs text-label-mono-xs bg-surface-container-lowest/90 px-1 py-0.5 rounded text-outline">IPX4</span>
+</div>
+<div class="flex-1 flex flex-col gap-space-xs">
+<div class="flex items-baseline justify-between">
+<h3 class="font-headline-sm text-headline-sm font-bold text-on-surface">TempoFlow FitBuds Lite</h3>
+<span class="font-label-mono text-headline-sm font-bold text-on-surface">£39.00</span>
+</div>
+<div class="flex items-center gap-space-md font-label-mono-xs text-label-mono-xs text-on-surface-variant">
+<span>Merchant: 4.1 ★ (310 reviews)</span>
+<span class="text-on-surface-variant">Forum Audit: Inconclusive</span>
+</div>
+<div class="mt-space-xs p-space-xs rounded bg-surface-container-low flex items-center gap-space-xs text-on-surface-variant">
+<span class="material-symbols-outlined text-[16px] text-outline shrink-0">help_outline</span>
+<span class="font-body-sm text-body-sm">Sparse independent runner logs · Basic silicone tip retention only</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- RIGHT COLUMN: Forensic Evidence Ledger & Citations (4 cols) -->
+<div class="lg:col-span-4 flex flex-col gap-space-md">
+<!-- Forensic Ledger Header with Quick Pill Switcher -->
+<div class="bg-surface-container rounded-xl p-space-md flex flex-col gap-space-md shadow-sm">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-space-xs">
+<span class="material-symbols-outlined text-primary text-[18px]">policy</span>
+<span class="font-headline-sm text-headline-sm text-on-surface">Forensic Ledger</span>
+</div>
+<span class="font-label-mono-xs text-label-mono-xs px-space-xs py-0.5 rounded bg-surface-container-high text-on-surface-variant">
+              types/contracts.ts
+            </span>
+</div>
+<!-- Comparative Tab Toggle -->
+<div class="flex items-center p-space-xs rounded-lg bg-surface-container-lowest gap-space-xs">
+<button class="flex-1 py-space-xs px-space-sm rounded font-label-mono text-label-mono text-center cursor-pointer transition-all bg-primary text-on-primary font-semibold" id="tab-btn-B" onclick="setCandidate('B')">
+              SoundCore (91%)
+            </button>
+<button class="flex-1 py-space-xs px-space-sm rounded font-label-mono text-label-mono text-center cursor-pointer transition-all text-on-surface-variant bg-surface-container-high" id="tab-btn-A" onclick="setCandidate('A')">
+              AuraPulse (Flaw)
+            </button>
+<button class="py-space-xs px-space-sm rounded font-label-mono text-label-mono text-center cursor-pointer transition-all text-on-surface-variant bg-surface-container-high" id="tab-btn-C" onclick="setCandidate('C')">
+              TempoFlow
+            </button>
+</div>
+<!-- EVIDENCE VIEW: SOUNDCORE APEX (Default Active) -->
+<div class="evidence-view flex flex-col gap-space-md" id="evidence-B">
+<!-- Synthesized Verdict Card -->
+<div class="p-space-sm rounded bg-surface-container-high flex flex-col gap-space-xs">
+<div class="flex items-center justify-between">
+<span class="font-label-mono-xs text-label-mono-xs text-primary font-bold tracking-wider uppercase">SYNTHESIZED FORENSIC VERDICT</span>
+<span class="font-label-mono-xs text-label-mono-xs text-on-surface-variant">24 Cross-refs</span>
+</div>
+<p class="font-body-md text-body-md text-on-surface">
+                “Matches 100% of buyer constraints (£74.50 &lt; £100 ceiling, verified IPX7 immersion tolerance, and dual-fin mechanical wingtip lock preventing sweat expulsion).”
+              </p>
+</div>
+<!-- Citations & Provenance Stream -->
+<div class="flex flex-col gap-space-sm">
+<span class="font-label-mono-xs text-label-mono-xs text-on-surface-variant uppercase font-semibold">VERIFIED CITATIONS (SOCIAL PROOF AUDIT)</span>
+<!-- Citation 1 -->
+<div class="p-space-sm rounded bg-surface-container-low flex flex-col gap-space-xs">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-space-xs font-label-mono-xs text-label-mono-xs text-primary">
+<span class="material-symbols-outlined text-[14px]">forum</span>
+<span>reddit.com/r/running</span>
+</div>
+<span class="font-label-mono-xs text-label-mono-xs px-space-xs rounded bg-surface-container-high text-on-surface">Weight: 0.94</span>
+</div>
+<blockquote class="font-body-sm text-body-sm text-on-surface-variant italic border-l-2 border-primary/40 pl-space-xs">
+                  “Ran the Manchester half-marathon in torrential drizzle. The Apex sport wings never budged once. Sweat seal remained dry inside canal.”
+                </blockquote>
+<div class="flex items-center justify-between font-label-mono-xs text-label-mono-xs text-on-surface-variant">
+<span>Author: VerifiedRunner_91</span>
+<span>Karma: 4.8k · 8 months ago</span>
+</div>
+</div>
+<!-- Citation 2 -->
+<div class="p-space-sm rounded bg-surface-container-low flex flex-col gap-space-xs">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-space-xs font-label-mono-xs text-label-mono-xs text-primary">
+<span class="material-symbols-outlined text-[14px]">hearing</span>
+<span>head-fi.org/threads/sports-iem</span>
+</div>
+<span class="font-label-mono-xs text-label-mono-xs px-space-xs rounded bg-surface-container-high text-on-surface">Weight: 0.88</span>
+</div>
+<blockquote class="font-body-sm text-body-sm text-on-surface-variant italic border-l-2 border-primary/40 pl-space-xs">
+                  “Teardown confirmed conformal nano-coating on the charging contacts. Zero corrosion under continuous saline bath testing.”
+                </blockquote>
+<div class="flex items-center justify-between font-label-mono-xs text-label-mono-xs text-on-surface-variant">
+<span>Audit: Lab Bench Hardware Teardown</span>
+<span>ID: #HF-7821-EX</span>
+</div>
+</div>
+</div>
+<!-- Quantitative Confidence Summary Chart -->
+<div class="p-space-sm rounded bg-surface-container-lowest flex flex-col gap-space-xs">
+<span class="font-label-mono-xs text-label-mono-xs text-on-surface-variant uppercase">EVIDENTIARY RELIABILITY PROFILE</span>
+<div class="flex items-center justify-between font-label-mono text-label-mono text-on-surface">
+<span>Mechanical Stability</span>
+<span class="text-primary font-bold">96%</span>
+</div>
+<div class="w-full bg-surface-container-high h-1.5 rounded-full overflow-hidden">
+<div class="bg-primary h-full" style="width: 96%"></div>
+</div>
+<div class="flex items-center justify-between font-label-mono text-label-mono text-on-surface pt-space-xs">
+<span>Moisture Ingress Resistance</span>
+<span class="text-primary font-bold">94%</span>
+</div>
+<div class="w-full bg-surface-container-high h-1.5 rounded-full overflow-hidden">
+<div class="bg-primary h-full" style="width: 94%"></div>
+</div>
+</div>
+</div>
+<!-- EVIDENCE VIEW: AURAPULSE PRO (Disqualified / Flaw Highlight) -->
+<div class="evidence-view hidden flex flex-col gap-space-md" id="evidence-A">
+<!-- Alert Verdict -->
+<div class="p-space-sm rounded bg-error-container/20 text-error flex flex-col gap-space-xs">
+<div class="flex items-center justify-between">
+<span class="font-label-mono-xs text-label-mono-xs text-secondary font-bold tracking-wider uppercase">DISQUALIFIED BY AGENT SAFETY VETO</span>
+<span class="font-label-mono-xs text-label-mono-xs text-error">Severe Fitness Mismatch</span>
+</div>
+<p class="font-body-md text-body-md text-on-surface">
+                “High return rate among runners due to wingless silicone casing slippage during sweat workouts. 4.8★ store rating masks serious mechanical fit failure in athletic use.”
+              </p>
+</div>
+<!-- Cited Forum Concerns -->
+<div class="flex flex-col gap-space-sm">
+<span class="font-label-mono-xs text-label-mono-xs text-on-surface-variant uppercase font-semibold">CITED ATHLETIC CONCERNS</span>
+<!-- Flaw 1 -->
+<div class="p-space-sm rounded bg-surface-container-low flex flex-col gap-space-xs">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-space-xs font-label-mono-xs text-label-mono-xs text-secondary">
+<span class="material-symbols-outlined text-[14px]">error</span>
+<span>reddit.com/r/running (Post #44102)</span>
+</div>
+<span class="font-label-mono-xs text-label-mono-xs px-space-xs rounded bg-surface-container-high text-error">Confidence: 89%</span>
+</div>
+<blockquote class="font-body-sm text-body-sm text-on-surface-variant italic border-l-2 border-secondary pl-space-xs">
+                  “Slipped out after 20 minutes of 5k jog once sweating started. Great sound, useless for gym workouts. Returned next day.”
+                </blockquote>
+<div class="flex items-center justify-between font-label-mono-xs text-label-mono-xs text-on-surface-variant">
+<span>3 corroborating upvoted replies</span>
+<span class="text-secondary font-medium">Flag: FIT_FAILURE</span>
+</div>
+</div>
+<!-- Flaw 2 -->
+<div class="p-space-sm rounded bg-surface-container-low flex flex-col gap-space-xs">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-space-xs font-label-mono-xs text-label-mono-xs text-secondary">
+<span class="material-symbols-outlined text-[14px]">build_circle</span>
+<span>head-fi.org/threads/aurapulse</span>
+</div>
+<span class="font-label-mono-xs text-label-mono-xs px-space-xs rounded bg-surface-container-high text-error">Confidence: 82%</span>
+</div>
+<blockquote class="font-body-sm text-body-sm text-on-surface-variant italic border-l-2 border-secondary pl-space-xs">
+                  “Case charging contact oxidation reported after 6 weeks damp usage in gym lockers. Pogo pins fail to register contact.”
+                </blockquote>
+<div class="flex items-center justify-between font-label-mono-xs text-label-mono-xs text-on-surface-variant">
+<span>Source: Senior Teardown Contributor</span>
+<span class="text-secondary font-medium">Flag: OXIDATION</span>
+</div>
+</div>
+</div>
+<!-- Pro Acknowledgment (Unbiased Verification) -->
+<div class="p-space-sm rounded bg-surface-container-lowest flex items-start gap-space-xs">
+<span class="material-symbols-outlined text-[16px] text-primary shrink-0">check</span>
+<div class="flex flex-col">
+<span class="font-label-mono-xs text-label-mono-xs text-on-surface font-semibold">Corroborated Positive Metric</span>
+<p class="font-body-sm text-body-sm text-on-surface-variant">
+                  Class-leading ANC in static desk tests (-32dB low-frequency suppression). However, constraint explicitly mandated gym and runner stability.
+                </p>
+</div>
+</div>
+</div>
+<!-- EVIDENCE VIEW: TEMPOFLOW FITBUDS (C) -->
+<div class="evidence-view hidden flex flex-col gap-space-md" id="evidence-C">
+<div class="p-space-sm rounded bg-surface-container-high flex flex-col gap-space-xs">
+<span class="font-label-mono-xs text-label-mono-xs text-on-surface-variant uppercase font-bold">LIMITED INDEPENDENT DATA</span>
+<p class="font-body-md text-body-md text-on-surface">
+                “Only 3 independent references located in runner databases. Basic friction retention without wingtips makes stability unprovable under heavy motion.”
+              </p>
+</div>
+<div class="p-space-sm rounded bg-surface-container-low text-on-surface-variant font-body-sm text-body-sm">
+              Sufficient for desk audio at £39.00, but fails to reach the 80% empirical confidence required to approve on behalf of an autonomous buyer.
+            </div>
+</div>
+<!-- Bottom Action Buttons in Right Column -->
+<div class="flex flex-col gap-space-xs pt-space-xs">
+<button class="w-full py-space-sm px-space-md rounded bg-primary-container text-on-primary-container font-headline-sm text-body-lg font-bold flex items-center justify-center gap-space-xs hover:bg-primary transition-all cursor-pointer shadow-md" onclick="toggleApprovalModal(true)">
+<span class="material-symbols-outlined text-[20px]">assignment_turned_in</span>
+              Review &amp; Authorize Selection (£74.50)
+            </button>
+<button class="w-full py-space-xs px-space-sm rounded bg-surface-container-high text-on-surface-variant hover:text-on-surface font-label-mono text-label-mono text-center cursor-pointer transition-colors" onclick="toggleJsonModal(true)">
+              Inspect Raw Audit JSON (`/api/social-proof`)
+            </button>
+</div>
+</div>
+<!-- Epistemic Proof Summary Box -->
+<div class="p-space-md rounded-xl bg-surface-container-low flex flex-col gap-space-xs text-on-surface-variant">
+<div class="flex items-center gap-space-xs text-on-surface">
+<span class="material-symbols-outlined text-primary text-[16px]">lock_clock</span>
+<span class="font-label-mono text-label-mono font-semibold">Ledger Immutability Guarantee</span>
+</div>
+<p class="font-label-mono-xs text-label-mono-xs">
+            Audit hash: <code class="text-primary">sha256:4a8b...99e1</code>. All synthetic review filtration weights generated locally. No affiliate revenue influence permitted in ranking calculations.
+          </p>
+</div>
+</div>
+</div>
+</main>
+<!-- Sticky Mobile / Bottom Floating Intent Banner (Always Accessible) -->
+<div class="sticky bottom-0 z-40 w-full bg-surface-container-lowest/95 backdrop-blur-md px-margin-lg py-space-sm shadow-[0_-2px_12px_rgba(0,0,0,0.5)]">
+<div class="max-w-[1720px] mx-auto flex flex-col sm:flex-row items-center justify-between gap-space-sm">
+<div class="flex items-center gap-space-sm" id="floating-bar-status">
+<span class="w-3 h-3 rounded-full bg-secondary animate-pulse"></span>
+<span class="font-label-mono text-label-mono text-on-surface font-medium">
+          Human Gate Active: Selection locked to <span class="text-primary font-bold">SoundCore Apex (£74.50)</span>
+</span>
+</div>
+<div class="flex items-center gap-space-sm w-full sm:w-auto">
+<button class="w-full sm:w-auto px-space-lg py-space-xs rounded bg-primary text-on-primary font-label-mono text-label-mono font-bold hover:bg-primary-container hover:text-on-primary-container transition-all cursor-pointer shadow-sm flex items-center justify-center gap-space-xs" onclick="toggleApprovalModal(true)">
+<span class="material-symbols-outlined text-[16px]">how_to_reg</span>
+          Approve &amp; Authorize Handoff
+        </button>
+</div>
+</div>
+</div>
+<!-- MODAL 1: Human Approval & Purchase Handoff Modal (components/ApprovalModal.tsx equivalent) -->
+<div class="fixed inset-0 z-50 hidden items-center justify-center bg-surface-container-lowest/80 backdrop-blur-md p-space-md" id="approval-modal">
+<div class="w-full max-w-2xl bg-surface-container rounded-xl shadow-2xl overflow-hidden flex flex-col">
+<!-- Modal Header -->
+<div class="p-space-md bg-surface-container-high flex items-center justify-between">
+<div class="flex items-center gap-space-sm">
+<div class="w-8 h-8 rounded bg-primary text-on-primary flex items-center justify-center">
+<span class="material-symbols-outlined text-[20px]">verified</span>
+</div>
+<div>
+<h2 class="font-headline-sm text-headline-sm font-bold text-on-surface">Purchase Authorization Gate</h2>
+<span class="font-label-mono-xs text-label-mono-xs text-on-surface-variant">Autonomous shopping contract verification</span>
+</div>
+</div>
+<button class="w-8 h-8 rounded-full bg-surface-container flex items-center justify-center text-on-surface-variant hover:text-on-surface cursor-pointer" onclick="toggleApprovalModal(false)">
+<span class="material-symbols-outlined text-[20px]">close</span>
+</button>
+</div>
+<!-- Modal Body -->
+<div class="p-space-lg flex flex-col gap-space-md overflow-y-auto max-h-[75vh]">
+<!-- Contract Honesty Disclosure -->
+<div class="p-space-sm rounded bg-surface-container-lowest flex items-start gap-space-sm text-on-surface">
+<span class="material-symbols-outlined text-secondary text-[20px] shrink-0">info</span>
+<div class="flex flex-col font-body-sm text-body-sm">
+<span class="font-semibold text-secondary">Contract Transparency Disclosure</span>
+<p class="text-on-surface-variant">
+              Opening a merchant link is a purchase handoff, not a completed silent charge. Your bank token is never exposed to the agent without explicit secondary session validation.
+            </p>
+</div>
+</div>
+<!-- Selected Candidate Overview -->
+<div class="p-space-md rounded bg-surface-container-low flex flex-col gap-space-sm">
+<div class="flex items-center justify-between">
+<span class="font-label-mono-xs text-label-mono-xs uppercase text-primary font-bold">Selected Item Summary</span>
+<span class="font-label-mono text-headline-sm font-bold text-on-surface">£74.50</span>
+</div>
+<div class="flex items-center gap-space-md">
+<div class="w-16 h-16 rounded overflow-hidden bg-surface-container-lowest shrink-0">
+<img class="w-full h-full object-cover" data-alt="Matte black wireless earbuds with sport stability wingtips in studio light." src="https://lh3.googleusercontent.com/aida-public/AB6AXuA7A44HqCfMYK07E6EZDuTjTib9hGadMXgM1VMj6l9fJ_azW-BD5NZOdHaRW37E9EFZN4URo8LuLKzDXVyxGCFRbIdAbGXTVUn0Kt7FVzXAeAvbPoCwbakbiZ4azAM9eHWJLWhIq1G8FWQdqB1QcfeZkg3fB4nXsuWPKR1tIc3xNuZIUtb-XZx0nlaqfZfaOmPCPbyqbhCjeXrM6EBpJgVfFJ_rE121P0gvY0vrdaXtH0CzlgsPif_5dw"/>
+</div>
+<div class="flex flex-col">
+<h4 class="font-headline-sm text-headline-sm font-bold text-on-surface">SoundCore Apex Sport Earbuds</h4>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Fulfillment: SoundCore UK Official Direct · Free standard courier delivery</p>
+<div class="flex items-center gap-space-xs font-label-mono-xs text-label-mono-xs text-primary mt-1">
+<span class="material-symbols-outlined text-[12px]">format_image_left</span>
+<span>30-Day No-Hassle Sweat Guarantee Included</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Reasoned Justification Block -->
+<div class="flex flex-col gap-space-xs">
+<span class="font-label-mono-xs text-label-mono-xs uppercase text-on-surface-variant font-semibold">Why Grok Bot selected this over Store #1 (AuraPulse Pro):</span>
+<ul class="flex flex-col gap-space-xs font-body-sm text-body-sm text-on-surface-variant bg-surface-container-low p-space-sm rounded">
+<li class="flex items-start gap-space-xs">
+<span class="material-symbols-outlined text-primary text-[16px] shrink-0 mt-0.5">check</span>
+<span><strong>Mechanical Retention:</strong> Wingtips lock securely into antihelix ridge; passes heavy moisture friction tests.</span>
+</li>
+<li class="flex items-start gap-space-xs">
+<span class="material-symbols-outlined text-primary text-[16px] shrink-0 mt-0.5">check</span>
+<span><strong>Budget Compliance:</strong> £74.50 saves £25.50 compared against your strict £100.00 ceiling.</span>
+</li>
+<li class="flex items-start gap-space-xs">
+<span class="material-symbols-outlined text-secondary text-[16px] shrink-0 mt-0.5">block</span>
+<span><strong>Disqualified AuraPulse Pro:</strong> Despite 4.8★ store claims, 34% of Reddit runners documented earbuds falling out during perspiration.</span>
+</li>
+</ul>
+</div>
+<!-- Interactive Confirmation Banner -->
+<div class="hidden p-space-sm rounded bg-surface-bright text-primary flex items-center gap-space-sm" id="handoff-confirmed-banner">
+<span class="material-symbols-outlined text-[20px]">check_circle</span>
+<div class="flex flex-col font-body-sm text-body-sm">
+<span class="font-bold">Merchant Session Token Dispatched!</span>
+<span class="text-on-surface">Redirect payload ready for merchant basket handoff (Session: GT-8992).</span>
+</div>
+</div>
+</div>
+<!-- Modal Footer -->
+<div class="p-space-md bg-surface-container-high flex flex-col sm:flex-row items-center justify-between gap-space-sm">
+<button class="font-label-mono text-label-mono text-on-surface-variant hover:text-on-surface cursor-pointer" onclick="toggleJsonModal(true); toggleApprovalModal(false)">
+          View Full JSON Schema
+        </button>
+<div class="flex items-center gap-space-sm w-full sm:w-auto">
+<button class="flex-1 sm:flex-initial px-space-md py-space-xs rounded bg-surface-container-low text-on-surface hover:bg-surface-variant font-label-mono text-label-mono cursor-pointer" onclick="toggleApprovalModal(false)">
+            Cancel
+          </button>
+<button class="flex-1 sm:flex-initial px-space-lg py-space-xs rounded bg-primary-container text-on-primary-container font-label-mono text-label-mono font-bold hover:bg-primary transition-all cursor-pointer shadow-md flex items-center justify-center gap-space-xs" id="auth-submit-btn" onclick="triggerAuthorizePurchase()">
+<span class="material-symbols-outlined text-[16px]">lock_open</span>
+            Authorize Purchase Handoff
+          </button>
+</div>
+</div>
+</div>
+</div>
+<!-- MODAL 2: Raw Audit JSON Inspector Modal (`types/contracts.ts`) -->
+<div class="fixed inset-0 z-50 hidden items-center justify-center bg-surface-container-lowest/85 backdrop-blur-md p-space-md" id="json-modal">
+<div class="w-full max-w-3xl bg-surface-container rounded-xl shadow-2xl overflow-hidden flex flex-col">
+<div class="p-space-md bg-surface-container-high flex items-center justify-between">
+<div class="flex items-center gap-space-sm">
+<span class="material-symbols-outlined text-primary text-[18px]">data_object</span>
+<span class="font-headline-sm text-headline-sm font-bold text-on-surface">Raw Audit Schema (`/api/social-proof`)</span>
+</div>
+<button class="w-8 h-8 rounded-full bg-surface-container flex items-center justify-center text-on-surface-variant hover:text-on-surface cursor-pointer" onclick="toggleJsonModal(false)">
+<span class="material-symbols-outlined text-[20px]">close</span>
+</button>
+</div>
+<div class="p-space-md bg-surface-container-lowest overflow-y-auto max-h-[70vh]">
+<pre class="font-label-mono-xs text-label-mono-xs text-primary leading-relaxed"><code>{
+  "contractVersion": "2025-02-truth-v1",
+  "auditTimestamp": "2025-05-18T10:44:12.890Z",
+  "sessionToken": "gt_live_0x8f2a49b01c409",
+  "buyerIntent": {
+    "query": "Workout earbuds under £100; prioritise secure fit and sweat resistance.",
+    "currency": "GBP",
+    "budgetCeilingPence": 10000,
+    "mandatoryConstraints": ["wingtip_lock", "sweat_resistance_ipx4_plus"]
+  },
+  "candidateProducts": [
+    {
+      "id": "prod_aurapulse_pro",
+      "name": "AuraPulse Pro Wireless",
+      "pricePence": 8999,
+      "merchantReportedScore": 4.8,
+      "merchantReviewCount": 1420,
+      "auditVerdict": {
+        "status": "DISQUALIFIED_BY_VETO",
+        "primaryFlaw": "High return rate among runners due to wingless casing slippage during sweat workouts.",
+        "forumDiscussionsAudited": 18,
+        "negativeCorrelationScore": 0.89,
+        "citations": [
+          {
+            "source": "reddit.com/r/running",
+            "threadId": "44102",
+            "confidence": 0.89,
+            "quote": "Slipped out after 20 minutes of 5k jog once sweating started. Great sound, useless for gym."
+          },
+          {
+            "source": "head-fi.org",
+            "threadId": "aurapulse-case-rust",
+            "confidence": 0.82,
+            "quote": "Case charging contact oxidation reported after 6 weeks damp usage."
+          }
+        ]
+      }
+    },
+    {
+      "id": "prod_soundcore_apex",
+      "name": "SoundCore Apex Sport Earbuds",
+      "pricePence": 7450,
+      "merchantReportedScore": 4.5,
+      "merchantReviewCount": 840,
+      "auditVerdict": {
+        "status": "RECOMMENDED_WINNER",
+        "confidence": 0.914,
+        "budgetHeadroomPence": 2550,
+        "physicalAttributes": {
+          "ipRatingVerified": "IPX7",
+          "retentionMechanism": "dual_fin_mechanical_wingtip"
+        },
+        "citations": [
+          {
+            "source": "reddit.com/r/running",
+            "weight": 0.94,
+            "quote": "Ran the Manchester half-marathon in torrential drizzle. The Apex sport wings never budged once."
+          }
+        ]
+      }
+    }
+  ]
+}</code></pre>
+</div>
+<div class="p-space-sm bg-surface-container-high flex justify-end">
+<button class="px-space-md py-space-xs rounded bg-surface-container text-on-surface hover:bg-surface-bright font-label-mono text-label-mono cursor-pointer" onclick="toggleJsonModal(false)">
+          Dismiss Payload
+        </button>
+</div>
+</div>
+</div>
+</div></main><footer class="w-full bg-surface-container-lowest py-space-md shadow-[0_-1px_6px_rgba(0,0,0,0.3)]"><div class="w-full px-margin-lg flex flex-col md:flex-row items-center justify-between gap-space-sm font-label-mono-xs text-label-mono-xs text-on-surface-variant"><div><span>SESSION ID: </span><span class="text-primary">0x8f2a...c409</span><span class="mx-space-xs">|</span><span>ENGINE: </span><span class="text-on-surface">Grok-Evidentiary-v2.4</span></div><div class="flex items-center gap-space-md"><span>VERIFICATION STATUS: REPRODUCIBLE LEDGER</span><span class="w-1.5 h-1.5 rounded-full bg-primary"></span><span>ZERO ARBITRARY TRUST</span></div></div></footer></body></html>

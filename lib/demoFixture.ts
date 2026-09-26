@@ -35,7 +35,7 @@ export const DEMO_PRODUCTS: Product[] = [
     merchantUrl:
       "https://www.amazon.co.uk/Jabra-Elite-Active-Bluetooth-Earbuds/dp/B09N6X5K6P",
     imageUrl:
-      "https://images.unsplash.com/photo-1484704849700-f032a97e26b7?auto=format&fit=crop&w=800&q=80",
+      "https://images.unsplash.com/photo-1572569511254-d8f925fe2cbb?auto=format&fit=crop&w=800&q=80",
     merchantRating: 4.3,
     merchantReviewCount: 9124,
     category: "workout-earbuds",
