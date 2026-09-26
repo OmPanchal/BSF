@@ -10,7 +10,7 @@ const plusJakarta = Plus_Jakarta_Sans({
 });
 
 export const metadata: Metadata = {
-  title: "Bullshit Filter",
+  title: "espresso",
   description:
     "Independent evidence before a shopping agent spends your money.",
 };
