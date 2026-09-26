@@ -271,10 +271,10 @@ export function SearchExperience() {
         >
           {searched ? (
             <div className="mb-4 flex w-full max-w-5xl items-center gap-3">
-              <span className="h-8 w-2 rounded-full bg-[#7aa2ff]" />
-              <p className="text-xl font-extrabold uppercase tracking-tight text-[#1c1917]">
-                Bullshit Filter
-              </p>
+              <span className="text-3xl leading-none" aria-hidden="true">
+                ☕
+              </span>
+              <p className="text-xl font-extrabold tracking-tight text-[#1c1917]">espresso</p>
             </div>
           ) : null}
           <div
@@ -285,7 +285,10 @@ export function SearchExperience() {
             }`}
           >
             <p className="mb-4 text-5xl font-extrabold tracking-tight text-[#1c1917] md:text-7xl">
-              Bullshit Filter
+              <span className="mr-3" aria-hidden="true">
+                ☕
+              </span>
+              espresso
             </p>
             <h1 className="text-2xl font-semibold tracking-tight text-[#1c1917] md:text-3xl">
               What should your bot buy?
