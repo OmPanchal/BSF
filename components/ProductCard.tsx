@@ -93,9 +93,15 @@ export function ProductCard({
           </ul>
         ) : null}
         {audit ? (
-          <p className="mt-3 line-clamp-3 text-sm leading-5 text-[#44403c]">
-            {audit.verdict}
-          </p>
+          audit.pros.length + audit.concerns.length === 0 ? (
+            <p className="mt-3 text-sm font-semibold leading-5 text-amber-900">
+              No pros or cons found in the reviews.
+            </p>
+          ) : (
+            <p className="mt-3 line-clamp-3 text-sm leading-5 text-[#44403c]">
+              {audit.verdict}
+            </p>
+          )
         ) : null}
         {product.merchantRating !== undefined ? (
           <p className="mt-3 text-xs text-[#78716c]">

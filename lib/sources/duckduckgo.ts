@@ -1,24 +1,18 @@
-import { decodeEntities } from "@/lib/pagePrice";
+import { decodeEntities, fetchMerchantHtml } from "@/lib/pagePrice";
 import { registerProductSource } from "@/lib/sources/registry";
-import type { ListingHit, SourceQuery } from "@/lib/sources/types";
+import type { ListingHit, ProductSource, SourceQuery } from "@/lib/sources/types";
 import { normalizeListingUrl } from "@/lib/webSearch";
 
-registerProductSource({
+export const duckduckgoSource: ProductSource = {
   id: "duckduckgo",
   enabled: () => true,
   async search(input: SourceQuery): Promise<ListingHit[]> {
     const q = `${input.specificProduct || input.query} buy UK`;
-    const response = await fetch(`https://html.duckduckgo.com/html/?q=${encodeURIComponent(q)}`, {
-      headers: {
-        "User-Agent":
-          "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36",
-        Accept: "text/html",
-        "Accept-Language": "en-GB,en;q=0.9",
-      },
-      signal: AbortSignal.timeout(10_000),
-    });
-    if (!response.ok) return [];
-    const html = await response.text();
+    const html = await fetchMerchantHtml(
+      `https://html.duckduckgo.com/html/?q=${encodeURIComponent(q)}`,
+      8_000,
+    );
+    if (!html) return [];
     const hits: ListingHit[] = [];
     const seen = new Set<string>();
     for (const match of html.matchAll(
@@ -32,4 +26,5 @@ registerProductSource({
     }
     return hits;
   },
-});
+};
+registerProductSource(duckduckgoSource);

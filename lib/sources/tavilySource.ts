@@ -1,5 +1,5 @@
 import { registerProductSource } from "@/lib/sources/registry";
-import type { ListingHit, SourceQuery } from "@/lib/sources/types";
+import type { ListingHit, ProductSource, SourceQuery } from "@/lib/sources/types";
 import { getTavilyApiKey, tavilySearch } from "@/lib/tavily";
 import { normalizeListingUrl } from "@/lib/webSearch";
 
@@ -30,7 +30,7 @@ function titleBeside(content: string, index: number): string {
     .slice(-140);
 }
 
-registerProductSource({
+export const tavilyProductSource: ProductSource = {
   id: "tavily",
   enabled: () => Boolean(getTavilyApiKey()),
   async search(input: SourceQuery): Promise<ListingHit[]> {
@@ -64,4 +64,5 @@ registerProductSource({
     }
     return hits;
   },
-});
+};
+registerProductSource(tavilyProductSource);

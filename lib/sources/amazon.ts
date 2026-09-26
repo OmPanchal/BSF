@@ -1,8 +1,8 @@
 import { searchAmazonUk } from "@/lib/amazonSearch";
 import { registerProductSource } from "@/lib/sources/registry";
-import type { ListingHit, SourceQuery } from "@/lib/sources/types";
+import type { ListingHit, ProductSource, SourceQuery } from "@/lib/sources/types";
 
-registerProductSource({
+export const amazonSource: ProductSource = {
   id: "amazon",
   enabled: () => true,
   async search(input: SourceQuery): Promise<ListingHit[]> {
@@ -18,4 +18,5 @@ registerProductSource({
       sourceId: "amazon",
     }));
   },
-});
+};
+registerProductSource(amazonSource);

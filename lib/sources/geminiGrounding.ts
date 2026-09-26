@@ -1,9 +1,9 @@
 import { geminiGenerate, geminiGroundingLinks, getGeminiApiKey } from "@/lib/llm";
 import { registerProductSource } from "@/lib/sources/registry";
-import type { ListingHit, SourceQuery } from "@/lib/sources/types";
+import type { ListingHit, ProductSource, SourceQuery } from "@/lib/sources/types";
 import { normalizeListingUrl } from "@/lib/webSearch";
 
-registerProductSource({
+export const geminiSource: ProductSource = {
   id: "gemini",
   enabled: () => Boolean(getGeminiApiKey()),
   async search(input: SourceQuery): Promise<ListingHit[]> {
@@ -22,7 +22,7 @@ registerProductSource({
         ],
         tools: [{ google_search: {} }],
       },
-      12_000,
+      6_000,
     );
     const hits: ListingHit[] = [];
     const seen = new Set<string>();
@@ -35,4 +35,5 @@ registerProductSource({
     }
     return hits;
   },
-});
+};
+registerProductSource(geminiSource);

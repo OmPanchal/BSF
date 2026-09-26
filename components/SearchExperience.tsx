@@ -94,6 +94,7 @@ export function SearchExperience() {
   const [error, setError] = useState<string | null>(null);
   const [warnings, setWarnings] = useState<string[]>([]);
   const [source, setSource] = useState<"live" | "demo_fixture">("live");
+  const [sortMode, setSortMode] = useState<"relevance" | "price-asc" | "price-desc">("relevance");
   const [drawerProductId, setDrawerProductId] = useState<string | null>(null);
   const [approvalProductId, setApprovalProductId] = useState<string | null>(
     null,
@@ -120,6 +121,7 @@ export function SearchExperience() {
     setProducts([]);
     setSimilar([]);
     setConstraints(undefined);
+    setSortMode("relevance");
     setDrawerProductId(null);
     setApprovalProductId(null);
     setEvidenceLoadingIds([]);
@@ -216,6 +218,20 @@ export function SearchExperience() {
       );
   }
 
+  function ordered(list: Product[]) {
+    if (sortMode === "relevance") return list;
+    return list
+      .map((product, index) => ({ product, index }))
+      .sort((a, b) => {
+        const byPrice =
+          sortMode === "price-asc"
+            ? a.product.pricePence - b.product.pricePence
+            : b.product.pricePence - a.product.pricePence;
+        return byPrice || a.index - b.index;
+      })
+      .map(({ product }) => product);
+  }
+
   function productGrid(list: Product[]) {
     return (
       <div className="mb-8 grid grid-cols-1 items-stretch gap-5 sm:grid-cols-2 xl:grid-cols-3">
@@ -253,6 +269,14 @@ export function SearchExperience() {
             searched ? "justify-start pb-2 pt-5" : "min-h-screen justify-center"
           }`}
         >
+          {searched ? (
+            <div className="mb-4 flex w-full max-w-5xl items-center gap-3">
+              <span className="h-8 w-2 rounded-full bg-[#7aa2ff]" />
+              <p className="text-xl font-extrabold uppercase tracking-tight text-[#1c1917]">
+                Bullshit Filter
+              </p>
+            </div>
+          ) : null}
           <div
             className={`w-full max-w-4xl overflow-hidden text-center transition-all duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] ${
               searched
@@ -353,6 +377,31 @@ export function SearchExperience() {
                   {constraints ? (
                     <ConstraintChips constraints={constraints} />
                   ) : null}
+                  <div className="mb-5 flex flex-wrap items-center gap-2">
+                    <span className="text-xs font-semibold uppercase tracking-wide text-[#78716c]">
+                      Sort
+                    </span>
+                    {(
+                      [
+                        ["relevance", "Relevance"],
+                        ["price-asc", "Price: low to high"],
+                        ["price-desc", "Price: high to low"],
+                      ] as const
+                    ).map(([mode, label]) => (
+                      <button
+                        key={mode}
+                        type="button"
+                        onClick={() => setSortMode(mode)}
+                        className={`btn-press rounded-full px-3 py-1 text-xs font-semibold shadow-sm ${
+                          sortMode === mode
+                            ? "bg-[#1c1917] text-white"
+                            : "bg-white text-[#57534e] hover:bg-[#fafaf9]"
+                        }`}
+                      >
+                        {label}
+                      </button>
+                    ))}
+                  </div>
                   {products.length > 0 ? (
                     <>
                       <div className="mb-4 flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
@@ -380,7 +429,7 @@ export function SearchExperience() {
                           ) : null}
                         </div>
                       </div>
-                      {productGrid(products)}
+                      {productGrid(ordered(products))}
                     </>
                   ) : null}
                   {similar.length > 0 ? (
@@ -393,7 +442,7 @@ export function SearchExperience() {
                         — usually the budget, or a word that is not on the
                         listing.
                       </p>
-                      {productGrid(similar)}
+                      {productGrid(ordered(similar))}
                     </div>
                   ) : null}
                   {loading ? (
@@ -418,6 +467,7 @@ export function SearchExperience() {
           product={drawerProduct}
           audit={auditFor(drawerProduct.id)}
           recommended={drawerProduct.id === recommendedId}
+          evidenceLoading={evidenceLoadingIds.includes(drawerProduct.id)}
           onClose={() => setDrawerProductId(null)}
           onBuy={() => setApprovalProductId(drawerProduct.id)}
         />

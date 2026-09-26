@@ -62,7 +62,7 @@ async function runWave(input: SourceQuery, deadline: number): Promise<ListingHit
   if (budget < 1_500) return [];
   const batches = await Promise.all(
     productSources().map((source) =>
-      withTimeout(source.search(input), budget, [] as ListingHit[]),
+      withTimeout(source.search(input).catch(() => [] as ListingHit[]), budget, [] as ListingHit[]),
     ),
   );
   return batches.flat();
