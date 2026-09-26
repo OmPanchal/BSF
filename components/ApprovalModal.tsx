@@ -1,5 +1,6 @@
 "use client";
 
+import { priceCheckLabel } from "@/lib/productDisplay";
 import type { Product } from "@/types/contracts";
 
 const gbp = new Intl.NumberFormat("en-GB", {
@@ -37,8 +38,9 @@ export function ApprovalModal({ product, onClose }: ApprovalModalProps) {
           <strong>
             {product.brand} {product.name}
           </strong>{" "}
-          ({gbp.format(product.pricePence / 100)} snapshot).
+          ({gbp.format(product.pricePence / 100)}).
         </p>
+        <p className="mt-1 text-[13px] text-[#45474a]">{priceCheckLabel(product)}</p>
         <p className="mt-2 text-[13px] text-[#45474a]">
           Status stays awaiting approval until you finish checkout on the
           merchant site.

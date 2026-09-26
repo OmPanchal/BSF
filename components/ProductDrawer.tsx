@@ -1,5 +1,10 @@
 "use client";
 
+import {
+  displayAttributes,
+  merchantHost,
+  priceCheckLabel,
+} from "@/lib/productDisplay";
 import type { Product, SocialProofAudit } from "@/types/contracts";
 import Image from "next/image";
 
@@ -36,7 +41,8 @@ export function ProductDrawer({
   onClose,
   onBuy,
 }: ProductDrawerProps) {
-  const attributes = Object.entries(product.attributes);
+  const attributes = displayAttributes(product);
+  const host = merchantHost(product);
 
   return (
     <div
@@ -94,9 +100,12 @@ export function ProductDrawer({
                 {gbp.format(product.pricePence / 100)}
               </span>
               <span className="rounded bg-[#eceef0] px-2 py-1 text-[11px] font-semibold text-[#1c1917]">
-                Price snapshot — may change
+                {priceCheckLabel(product)}
               </span>
             </div>
+            {host ? (
+              <p className="mt-2 text-xs text-[#45474a]">Sold via {host}</p>
+            ) : null}
             {product.merchantRating !== undefined ? (
               <div className="mt-2 flex items-center gap-1 text-[#45474a]">
                 <span className="material-symbols-outlined text-[18px] text-[#191c1e]">
@@ -144,6 +153,13 @@ export function ProductDrawer({
                   {audit.sourceCount} sources · {audit.confidence} confidence
                 </span>
               </div>
+              {audit.status !== "complete" ? (
+                <p className="mb-2 inline-block rounded bg-amber-100 px-2 py-1 text-[11px] font-semibold text-amber-900">
+                  {audit.status === "error"
+                    ? "Evidence lookup failed"
+                    : "Limited independent evidence"}
+                </p>
+              ) : null}
               <p className="text-[15px] leading-6 text-[#45474a]">{audit.verdict}</p>
               <div className="mt-4">
                 <p className="text-[11px] font-bold uppercase tracking-wide">
@@ -206,6 +222,7 @@ export function ProductDrawer({
                     </p>
                     <p className="mt-1 text-[11px] uppercase text-[#1c1917]">
                       {source.sourceType}
+                      {source.publishedAt ? ` · ${source.publishedAt}` : ""}
                     </p>
                   </a>
                 ))}

@@ -1,4 +1,4 @@
-import { getDemoAgentTask } from "@/lib/demoFixture";
+import { createAgentTask } from "@/lib/agent";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function POST(request: NextRequest) {
@@ -28,5 +28,6 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  return NextResponse.json(getDemoAgentTask(intent, candidateIds));
+  const task = await createAgentTask(intent, candidateIds);
+  return NextResponse.json(task);
 }

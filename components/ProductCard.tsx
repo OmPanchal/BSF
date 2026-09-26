@@ -1,5 +1,6 @@
 "use client";
 
+import { merchantHost, priceCheckLabel } from "@/lib/productDisplay";
 import type { Product, SocialProofAudit } from "@/types/contracts";
 import Image from "next/image";
 
@@ -25,11 +26,12 @@ export function ProductCard({
 }: ProductCardProps) {
   const highlight = product.attributes.listedUse
     ? String(product.attributes.listedUse)
-    : product.category;
+    : (merchantHost(product) ?? product.category);
   const ip = product.attributes.ipRating
     ? String(product.attributes.ipRating)
     : null;
   const hasConcerns = (audit?.concerns.length ?? 0) > 0;
+  const limitedEvidence = audit !== undefined && audit.status !== "complete";
 
   return (
     <article
@@ -60,7 +62,9 @@ export function ProductCard({
               ? "Recommended"
               : hasConcerns
                 ? `${audit?.concerns.length ?? 0} concern${audit?.concerns.length === 1 ? "" : "s"}`
-                : audit?.confidence}
+                : limitedEvidence
+                  ? "Limited independent evidence"
+                  : `${audit?.confidence} confidence`}
           </div>
         ) : null}
       </div>
@@ -81,13 +85,21 @@ export function ProductCard({
             {audit.verdict}
           </p>
         ) : null}
-        <div className="mb-4 mt-4 flex items-baseline gap-2">
+        {product.merchantRating !== undefined ? (
+          <p className="mt-3 text-xs text-[#78716c]">
+            {product.merchantRating.toFixed(1)} merchant rating
+            {product.merchantReviewCount !== undefined
+              ? ` · ${product.merchantReviewCount.toLocaleString("en-GB")} reviews`
+              : ""}
+          </p>
+        ) : null}
+        <div className="mb-4 mt-4">
           <span className="text-3xl font-extrabold tracking-tight">
             {gbp.format(product.pricePence / 100)}
           </span>
-          <span className="text-xs text-[#a8a29e]">
-            snapshot
-          </span>
+          <p className="mt-1 text-[11px] text-[#a8a29e]">
+            {priceCheckLabel(product)}
+          </p>
         </div>
         <div
           className="mt-auto grid grid-cols-2 gap-2"

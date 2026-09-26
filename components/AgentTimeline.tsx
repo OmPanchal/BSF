@@ -19,6 +19,11 @@ export function AgentTimeline({ task, selectedProduct }: AgentTimelineProps) {
             ? "Simulated agent walkthrough"
             : "Grok Bot"}
         </span>
+        {task.status === "awaiting_approval" ? (
+          <span className="rounded-full bg-[#f5f5f4] px-3 py-1 text-[11px] font-semibold text-[#57534e]">
+            Awaiting your approval
+          </span>
+        ) : null}
       </div>
       {selectedProduct ? (
         <p className="mb-3 text-sm font-semibold text-[#1c1917]">
@@ -34,10 +39,24 @@ export function AgentTimeline({ task, selectedProduct }: AgentTimelineProps) {
             key={event.step}
             className="rounded-2xl bg-[#fafaf9] p-3 text-sm leading-5 text-[#57534e]"
           >
-            <span className="mb-2 flex h-7 w-7 items-center justify-center rounded-full bg-[#1c1917] text-xs font-semibold text-white">
+            <span
+              className={`mb-2 flex h-7 w-7 items-center justify-center rounded-full text-xs font-semibold text-white ${
+                event.status === "failed" ? "bg-[#9d174d]" : "bg-[#1c1917]"
+              }`}
+            >
               {event.step}
             </span>
             {event.message}
+            {event.sourceUrl ? (
+              <a
+                href={event.sourceUrl}
+                target="_blank"
+                rel="noreferrer"
+                className="mt-1 block text-xs font-semibold text-[#1c1917] underline"
+              >
+                Source
+              </a>
+            ) : null}
           </li>
         ))}
       </ol>

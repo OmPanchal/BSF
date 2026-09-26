@@ -1,4 +1,4 @@
-import { getDemoAudit } from "@/lib/demoFixture";
+import { auditProduct } from "@/lib/audit";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function POST(request: NextRequest) {
@@ -25,14 +25,12 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  const audit = getDemoAudit(productId);
-
-  if (!audit) {
-    return NextResponse.json(
-      { error: `Unknown productId: ${productId}` },
-      { status: 400 },
-    );
+  try {
+    const audit = await auditProduct(productId);
+    return NextResponse.json(audit);
+  } catch (caught) {
+    const message =
+      caught instanceof Error ? caught.message : `Unknown productId: ${productId}`;
+    return NextResponse.json({ error: message }, { status: 400 });
   }
-
-  return NextResponse.json(audit);
 }

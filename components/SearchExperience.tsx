@@ -28,6 +28,8 @@ export function SearchExperience() {
   const [loading, setLoading] = useState(false);
   const [searched, setSearched] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [warnings, setWarnings] = useState<string[]>([]);
+  const [source, setSource] = useState<"live" | "demo_fixture">("live");
   const [drawerProductId, setDrawerProductId] = useState<string | null>(null);
   const [approvalProductId, setApprovalProductId] = useState<string | null>(
     null,
@@ -38,6 +40,7 @@ export function SearchExperience() {
     if (!next || loading) return;
     setSearched(true);
     setError(null);
+    setWarnings([]);
     setAudits([]);
     setTask(null);
     setDrawerProductId(null);
@@ -53,6 +56,8 @@ export function SearchExperience() {
       setProducts(result.products);
       setAudits(result.audits);
       setTask(result.task);
+      setSource(result.source);
+      setWarnings(result.warnings);
     } catch (caught: unknown) {
       setProducts([]);
       setAudits([]);
@@ -159,6 +164,13 @@ export function SearchExperience() {
                   {error}
                 </p>
               ) : null}
+              {!loading && warnings.length > 0 ? (
+                <div className="mb-6 space-y-1 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
+                  {warnings.map((warning) => (
+                    <p key={warning}>{warning}</p>
+                  ))}
+                </div>
+              ) : null}
               {loading ? <SearchSkeletons /> : null}
               {products.length > 0 && !loading ? (
                 <>
@@ -168,11 +180,22 @@ export function SearchExperience() {
                         ? "1 result"
                         : `${products.length} results`}
                     </h2>
-                    {audits.some((audit) => audit.mode === "demo_fixture") ? (
-                      <span className="inline-flex items-center rounded-full bg-white px-3 py-1 text-[11px] font-semibold text-[#57534e] shadow-sm">
-                        Demo evidence snapshot
-                      </span>
-                    ) : null}
+                    <div className="flex flex-wrap gap-2">
+                      {source === "demo_fixture" ? (
+                        <span className="inline-flex items-center rounded-full bg-white px-3 py-1 text-[11px] font-semibold text-[#9d174d] shadow-sm">
+                          Demo catalogue — live search unavailable
+                        </span>
+                      ) : null}
+                      {audits.some((audit) => audit.mode === "demo_fixture") ? (
+                        <span className="inline-flex items-center rounded-full bg-white px-3 py-1 text-[11px] font-semibold text-[#57534e] shadow-sm">
+                          Demo evidence snapshot
+                        </span>
+                      ) : audits.length > 0 ? (
+                        <span className="inline-flex items-center rounded-full bg-white px-3 py-1 text-[11px] font-semibold text-[#57534e] shadow-sm">
+                          Live sources
+                        </span>
+                      ) : null}
+                    </div>
                   </div>
                   <div className="mb-8 grid grid-cols-1 items-stretch gap-5 sm:grid-cols-2 xl:grid-cols-3">
                     {products.map((product, index) => (
