@@ -1,6 +1,7 @@
 "use client";
 
-import type { Product } from "@/types/contracts";
+import { merchantHost, priceCheckLabel } from "@/lib/productDisplay";
+import type { Product, SocialProofAudit } from "@/types/contracts";
 import Image from "next/image";
 
 const gbp = new Intl.NumberFormat("en-GB", {
@@ -10,61 +11,116 @@ const gbp = new Intl.NumberFormat("en-GB", {
 
 type ProductCardProps = {
   product: Product;
+  audit?: SocialProofAudit;
   recommended?: boolean;
+  onOpen: () => void;
+  onBuy: () => void;
 };
 
-export function ProductCard({ product, recommended }: ProductCardProps) {
+export function ProductCard({
+  product,
+  audit,
+  recommended,
+  onOpen,
+  onBuy,
+}: ProductCardProps) {
+  const highlight = product.attributes.listedUse
+    ? String(product.attributes.listedUse)
+    : (merchantHost(product) ?? product.category);
+  const ip = product.attributes.ipRating
+    ? String(product.attributes.ipRating)
+    : null;
+  const hasConcerns = (audit?.concerns.length ?? 0) > 0;
+  const limitedEvidence = audit !== undefined && audit.status !== "complete";
+
   return (
     <article
-      className={`flex gap-4 rounded-xl border bg-[#1a222c] p-4 ${
-        recommended ? "border-[#7dd3c0]" : "border-[#2a3644]"
-      }`}
+      className="btn-press group relative flex h-full cursor-pointer flex-col overflow-hidden rounded-[28px] bg-white shadow-[0_18px_50px_rgba(80,40,20,0.08)] hover:shadow-[0_22px_60px_rgba(80,40,20,0.14)]"
+      onClick={onOpen}
     >
-      {product.imageUrl ? (
-        <Image
-          src={product.imageUrl}
-          alt={`${product.brand} ${product.name}`}
-          width={120}
-          height={120}
-          unoptimized
-          className="h-[120px] w-[120px] shrink-0 rounded-lg object-cover"
-        />
-      ) : null}
-      <div className="min-w-0 flex-1">
-        {recommended ? (
-          <p className="mb-1 text-xs font-semibold uppercase tracking-wide text-[#7dd3c0]">
-            Recommended for this buyer
-          </p>
+      <div className="relative aspect-[16/9] overflow-hidden bg-[#f5f5f4]">
+        {product.imageUrl ? (
+          <Image
+            src={product.imageUrl}
+            alt={`${product.brand} ${product.name}`}
+            fill
+            className="object-cover transition-transform duration-500 group-hover:scale-105"
+            sizes="(max-width: 768px) 100vw, 480px"
+          />
         ) : null}
-        <h3 className="text-lg font-semibold">
-          {product.brand} {product.name}
+        {recommended || hasConcerns || audit ? (
+          <div
+            className={`absolute left-3 top-3 rounded-full px-3 py-1 text-[11px] font-semibold ${
+              recommended
+                ? "bg-[#1c1917] text-white"
+                : hasConcerns
+                  ? "bg-white/90 text-[#9d174d]"
+                  : "bg-white/90 text-[#57534e]"
+            }`}
+          >
+            {recommended
+              ? "Recommended"
+              : hasConcerns
+                ? `${audit?.concerns.length ?? 0} concern${audit?.concerns.length === 1 ? "" : "s"}`
+                : limitedEvidence
+                  ? "Limited independent evidence"
+                  : `${audit?.confidence} confidence`}
+          </div>
+        ) : null}
+      </div>
+      <div className="flex flex-1 flex-col p-5">
+        <p className="text-xs font-medium text-[#78716c]">
+          {product.brand}
+          {audit ? ` · ${audit.confidence} confidence` : ""}
+        </p>
+        <h3 className="mt-1 text-2xl font-extrabold tracking-tight text-[#1c1917]">
+          {product.name}
         </h3>
-        <p className="mt-1 text-xl text-slate-100">
-          {gbp.format(product.pricePence / 100)}
+        <p className="mt-1 text-sm text-[#78716c]">
+          {ip ? `${ip} · ` : null}
+          {highlight}
         </p>
-        <p className="mt-1 text-xs text-slate-500">
-          {typeof product.attributes.priceCheckedAt === "string"
-            ? `Price read from the merchant page at ${new Date(
-                product.attributes.priceCheckedAt,
-              ).toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" })} — may change`
-            : "Price snapshot — may change"}
-        </p>
-        {product.merchantRating !== undefined ? (
-          <p className="mt-2 text-sm text-slate-400">
-            Merchant rating {product.merchantRating.toFixed(1)}
-            {product.merchantReviewCount !== undefined
-              ? ` (${product.merchantReviewCount.toLocaleString("en-GB")} reviews)`
-              : null}
+        {audit ? (
+          <p className="mt-3 line-clamp-3 text-sm leading-5 text-[#44403c]">
+            {audit.verdict}
           </p>
         ) : null}
-        <a
-          href={product.merchantUrl}
-          target="_blank"
-          rel="noreferrer"
-          className="mt-2 inline-block text-sm text-[#7dd3c0] underline"
+        {product.merchantRating !== undefined ? (
+          <p className="mt-3 text-xs text-[#78716c]">
+            {product.merchantRating.toFixed(1)} merchant rating
+            {product.merchantReviewCount !== undefined
+              ? ` · ${product.merchantReviewCount.toLocaleString("en-GB")} reviews`
+              : ""}
+          </p>
+        ) : null}
+        <div className="mb-4 mt-4">
+          <span className="text-3xl font-extrabold tracking-tight">
+            {gbp.format(product.pricePence / 100)}
+          </span>
+          <p className="mt-1 text-[11px] text-[#a8a29e]">
+            {priceCheckLabel(product)}
+          </p>
+        </div>
+        <div
+          className="mt-auto grid grid-cols-2 gap-2"
+          onClick={(event) => event.stopPropagation()}
         >
-          Merchant listing
-        </a>
+          <button
+            type="button"
+            className="btn-press h-10 rounded-full border border-[#e7e5e4] text-xs font-semibold text-[#1c1917] hover:bg-[#fafaf9]"
+            onClick={onOpen}
+          >
+            View details
+          </button>
+          <button
+            type="button"
+            className="btn-press flex h-10 items-center justify-center gap-1 rounded-full bg-[#1c1917] px-2 text-xs font-semibold text-white hover:bg-black"
+            onClick={onBuy}
+          >
+            <span className="material-symbols-outlined text-[16px]">bolt</span>
+            Buy now
+          </button>
+        </div>
       </div>
     </article>
   );

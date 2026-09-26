@@ -55,15 +55,15 @@ function heuristicPick(
 
   const audit = audits.find((item) => item.productId === selected.id);
   const concern = audit?.concerns[0]?.text;
+  const price = `£${(selected.pricePence / 100).toFixed(2)}`;
   const rationale = [
-    `${selected.brand} ${selected.name} is the closest match to this buyer request`,
-    budget
-      ? `at ${(selected.pricePence / 100).toFixed(2)} GBP, within the stated budget`
-      : `at ${(selected.pricePence / 100).toFixed(2)} GBP`,
+    `${selected.brand} ${selected.name} is the closest match to this buyer request at ${price}${
+      budget ? ", within the stated budget" : ""
+    }.`,
     concern
       ? `Independent notes still include: ${concern}`
       : "Independent evidence is limited, so this is a constrained recommendation rather than a certainty.",
-  ].join(". ");
+  ].join(" ");
 
   return { selectedProductId: selected.id, rationale };
 }

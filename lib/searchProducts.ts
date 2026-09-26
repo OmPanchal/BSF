@@ -139,7 +139,7 @@ function guessBrandAndName(title: string): { brand: string; name: string } {
     .trim();
   const parts = cleaned.split(/\s+/);
   const brand = parts[0] ?? "Unknown";
-  const name = parts.slice(1, 8).join(" ") || cleaned;
+  const name = (parts.slice(1, 8).join(" ") || cleaned).replace(/[\s,;:|–-]+$/, "");
   return { brand, name };
 }
 
@@ -269,10 +269,15 @@ export async function searchProductsLive(intent: string): Promise<Product[]> {
       ],
       timeoutMs: 14_000,
     }),
+    // Tavily returns no results when `country` is combined with `includeDomains`.
     tavilySearch(`${intent} UK price`, {
-      maxResults: 8,
-      country: "united kingdom",
-      includeDomains: ["amazon.co.uk", "argos.co.uk", "johnlewis.com"],
+      maxResults: 10,
+      includeDomains: ["amazon.co.uk"],
+      timeoutMs: 14_000,
+    }),
+    tavilySearch(intent, {
+      maxResults: 10,
+      includeDomains: ["amazon.co.uk"],
       timeoutMs: 14_000,
     }),
   ]);
