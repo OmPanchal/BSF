@@ -1,5 +1,7 @@
 "use client";
 
+import { useEffect, useState } from "react";
+
 type IntentBarProps = {
   value: string;
   onChange: (value: string) => void;
@@ -7,38 +9,105 @@ type IntentBarProps = {
   loading: boolean;
 };
 
+const SEARCH_STEPS = [
+  "Matching the catalogue…",
+  "Checking independent evidence…",
+  "Comparing fit and budget…",
+];
+
 export function IntentBar({
   value,
   onChange,
   onSubmit,
   loading,
 }: IntentBarProps) {
+  const [step, setStep] = useState(0);
+
+  useEffect(() => {
+    if (!loading) {
+      setStep(0);
+      return;
+    }
+    const timer = window.setInterval(() => {
+      setStep((current) => (current + 1) % SEARCH_STEPS.length);
+    }, 700);
+    return () => window.clearInterval(timer);
+  }, [loading]);
+
   return (
     <form
-      className="flex flex-col gap-3 sm:flex-row sm:items-end"
+      className="w-full"
       onSubmit={(event) => {
         event.preventDefault();
         onSubmit();
       }}
     >
-      <label className="flex-1">
-        <span className="mb-2 block text-sm font-medium text-slate-300">
-          What should your bot buy?
+      <label
+        className="mb-3 block text-center text-lg font-bold tracking-tight md:text-xl"
+        htmlFor="buyer-intent"
+      >
+        What should your bot buy?
+      </label>
+      <div
+        className={`relative flex h-[72px] items-center overflow-hidden rounded-2xl border-2 bg-white pl-5 pr-3 shadow-[0_12px_32px_rgba(15,23,42,0.16)] ring-4 transition-[border-color,box-shadow] duration-300 ${
+          loading
+            ? "border-[#0051d5] ring-[#0051d5]/15"
+            : "border-black ring-black/5 focus-within:ring-black/10"
+        }`}
+      >
+        {loading ? (
+          <span className="pointer-events-none absolute inset-x-0 bottom-0 h-[3px] overflow-hidden bg-[#dbe1ff]">
+            <span className="animate-search-scan absolute inset-y-0 w-1/3 rounded-full bg-[#0051d5]" />
+          </span>
+        ) : null}
+        <span
+          className={`material-symbols-outlined mr-3 shrink-0 text-[28px] text-[#0051d5] ${
+            loading ? "animate-icon-pulse" : ""
+          }`}
+        >
+          {loading ? "radar" : "search"}
         </span>
         <input
-          className="w-full rounded-lg border border-[#2a3644] bg-[#121920] px-4 py-3 text-base text-slate-100 outline-none ring-[#7dd3c0] placeholder:text-slate-500 focus:ring-2"
+          id="buyer-intent"
+          className="h-full w-full bg-transparent text-base font-medium text-[#191c1e] outline-none placeholder:font-normal placeholder:text-[#45474a]/70"
           value={value}
           onChange={(event) => onChange(event.target.value)}
-          placeholder="Workout earbuds under £100"
+          placeholder="Search products, e.g. workout earbuds under £100 with secure fit..."
+          disabled={loading}
         />
-      </label>
-      <button
-        type="submit"
-        disabled={loading}
-        className="rounded-lg bg-[#7dd3c0] px-5 py-3 text-base font-semibold text-[#0f1419] hover:bg-[#9ee0d2] disabled:cursor-not-allowed disabled:opacity-60"
+        {value && !loading ? (
+          <button
+            type="button"
+            aria-label="Clear search"
+            className="btn-press mr-2 flex shrink-0 items-center justify-center rounded-full p-1 text-[#45474a] hover:bg-[#eceef0] hover:text-[#191c1e]"
+            onClick={() => onChange("")}
+          >
+            <span className="material-symbols-outlined text-[20px]">close</span>
+          </button>
+        ) : null}
+        <button
+          type="submit"
+          disabled={loading}
+          className="btn-press flex h-12 shrink-0 items-center justify-center gap-1.5 rounded-xl bg-black px-5 text-sm font-bold text-white hover:bg-[#45474a] disabled:opacity-80"
+        >
+          <span
+            className={`material-symbols-outlined text-[20px] ${
+              loading ? "animate-spin-slow" : ""
+            }`}
+          >
+            {loading ? "progress_activity" : "search"}
+          </span>
+          {loading ? "Searching…" : "Search"}
+        </button>
+      </div>
+      <p
+        className={`mt-3 h-5 text-center text-sm font-semibold text-[#0051d5] transition-opacity duration-200 ${
+          loading ? "opacity-100" : "opacity-0"
+        }`}
+        aria-live="polite"
       >
-        {loading ? "Searching…" : "Search"}
-      </button>
+        {loading ? SEARCH_STEPS[step] : "\u00a0"}
+      </p>
     </form>
   );
 }

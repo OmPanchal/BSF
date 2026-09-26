@@ -1,6 +1,6 @@
 "use client";
 
-import type { Product } from "@/types/contracts";
+import type { Product, SocialProofAudit } from "@/types/contracts";
 import Image from "next/image";
 
 const gbp = new Intl.NumberFormat("en-GB", {
@@ -10,54 +10,107 @@ const gbp = new Intl.NumberFormat("en-GB", {
 
 type ProductCardProps = {
   product: Product;
+  audit?: SocialProofAudit;
   recommended?: boolean;
+  onOpen: () => void;
+  onBuy: () => void;
 };
 
-export function ProductCard({ product, recommended }: ProductCardProps) {
+export function ProductCard({
+  product,
+  audit,
+  recommended,
+  onOpen,
+  onBuy,
+}: ProductCardProps) {
+  const highlight = product.attributes.listedUse
+    ? String(product.attributes.listedUse)
+    : product.category;
+  const ip = product.attributes.ipRating
+    ? String(product.attributes.ipRating)
+    : null;
+  const hasConcerns = (audit?.concerns.length ?? 0) > 0;
+
   return (
     <article
-      className={`flex gap-4 rounded-xl border bg-[#1a222c] p-4 ${
-        recommended ? "border-[#7dd3c0]" : "border-[#2a3644]"
+      className={`btn-press group relative flex cursor-pointer flex-col rounded-xl bg-white p-3 shadow-sm hover:shadow-md ${
+        recommended
+          ? "border-2 border-[#0051d5] shadow-[0_8px_24px_rgba(0,81,213,0.12)]"
+          : hasConcerns
+            ? "border border-[#c6c6ca]/30 border-t-4 border-t-amber-500"
+            : "border border-[#c6c6ca]/30"
       }`}
+      onClick={onOpen}
     >
-      {product.imageUrl ? (
-        <Image
-          src={product.imageUrl}
-          alt={`${product.brand} ${product.name}`}
-          width={120}
-          height={120}
-          className="h-[120px] w-[120px] shrink-0 rounded-lg object-cover"
-        />
-      ) : null}
-      <div className="min-w-0 flex-1">
+      <div className="relative mb-3 aspect-[16/10] overflow-hidden rounded-lg bg-[#eceef0]">
+        {product.imageUrl ? (
+          <Image
+            src={product.imageUrl}
+            alt={`${product.brand} ${product.name}`}
+            fill
+            className="object-cover transition-transform duration-500 group-hover:scale-105"
+            sizes="(max-width: 768px) 100vw, 400px"
+          />
+        ) : null}
+        <div className="absolute left-2 top-2 rounded bg-white/90 px-2 py-0.5 text-[10px] font-bold tracking-wide backdrop-blur-md">
+          {product.brand}
+        </div>
         {recommended ? (
-          <p className="mb-1 text-xs font-semibold uppercase tracking-wide text-[#7dd3c0]">
-            Recommended for this buyer
-          </p>
+          <div className="absolute right-2 top-2 rounded bg-[#0051d5] px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-white">
+            Best match
+          </div>
         ) : null}
-        <h3 className="text-lg font-semibold">
-          {product.brand} {product.name}
-        </h3>
-        <p className="mt-1 text-xl text-slate-100">
-          {gbp.format(product.pricePence / 100)}
+      </div>
+      {audit ? (
+        <div className="mb-2 flex items-center justify-between gap-2 text-[11px] font-bold">
+          <span className="flex items-center gap-1">
+            <span className="inline-block h-1.5 w-1.5 rounded-full bg-[#0051d5]" />
+            {audit.confidence} confidence
+          </span>
+          {recommended ? (
+            <span className="text-[#0051d5]">Best match</span>
+          ) : (
+            <span className="font-medium text-[#45474a]">Candidate</span>
+          )}
+        </div>
+      ) : null}
+      <h3 className="line-clamp-1 text-base font-bold group-hover:text-[#0051d5]">
+        {product.brand} {product.name}
+      </h3>
+      <p className="mt-0.5 line-clamp-1 text-xs text-[#45474a]">
+        {ip ? `${ip} · ` : null}
+        {highlight}
+      </p>
+      {audit ? (
+        <p className="mt-1 line-clamp-2 text-xs leading-4 text-[#45474a]">
+          {audit.verdict}
         </p>
-        <p className="mt-1 text-xs text-slate-500">Price snapshot — may change</p>
-        {product.merchantRating !== undefined ? (
-          <p className="mt-2 text-sm text-slate-400">
-            Merchant rating {product.merchantRating.toFixed(1)}
-            {product.merchantReviewCount !== undefined
-              ? ` (${product.merchantReviewCount.toLocaleString("en-GB")} reviews)`
-              : null}
-          </p>
-        ) : null}
-        <a
-          href={product.merchantUrl}
-          target="_blank"
-          rel="noreferrer"
-          className="mt-2 inline-block text-sm text-[#7dd3c0] underline"
+      ) : null}
+      <div className="mb-3 mt-2 flex items-baseline gap-1">
+        <span className="text-lg font-extrabold">
+          {gbp.format(product.pricePence / 100)}
+        </span>
+        <span className="text-[11px] text-[#45474a]">snapshot</span>
+      </div>
+      <div
+        className="mt-auto grid grid-cols-2 gap-2"
+        onClick={(event) => event.stopPropagation()}
+      >
+        <button
+          type="button"
+          className="btn-press h-9 rounded-lg bg-[#eceef0] px-2 text-center text-[11px] font-semibold hover:bg-[#e6e8ea]"
+          onClick={onOpen}
         >
-          Merchant listing
-        </a>
+          View details
+        </button>
+        <button
+          type="button"
+          className="btn-press flex h-9 items-center justify-center gap-1 rounded-lg bg-black px-2 text-[11px] font-bold text-white hover:bg-[#45474a]"
+          onClick={onBuy}
+        >
+          <span className="material-symbols-outlined text-[16px]">bolt</span>
+          Buy now
+        </button>
       </div>
     </article>
   );
