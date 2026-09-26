@@ -469,7 +469,7 @@ export async function parseIntent(query: string): Promise<SearchConstraints> {
   }
 
   try {
-    const payload = (await completeJson(
+    const pending = completeJson(
       [
         "Rewrite a messy UK shopping request into a structured product search.",
         "Return JSON only:",
@@ -484,7 +484,12 @@ export async function parseIntent(query: string): Promise<SearchConstraints> {
         "Do not invent a budget or product they did not mention.",
       ].join(" "),
       query,
-    )) as Record<string, unknown> | null;
+      2_500,
+    ).catch(() => null);
+    const payload = (await Promise.race([
+      pending,
+      new Promise<null>((resolve) => setTimeout(() => resolve(null), 2_500)),
+    ])) as Record<string, unknown> | null;
     if (!payload || typeof payload !== "object") {
       return rules;
     }

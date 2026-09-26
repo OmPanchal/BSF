@@ -144,6 +144,10 @@ async function callGemini(
   model: string,
   timeoutMs: number,
 ): Promise<{ ok: boolean; status: number; payload: unknown }> {
+  // Short calls are the search parser. They must not wait behind review jobs.
+  if (timeoutMs <= 3_000) {
+    return geminiGenerateWithModel(body, model, timeoutMs);
+  }
   await acquireGemini();
   try {
     return await geminiGenerateWithModel(body, model, timeoutMs);
@@ -157,38 +161,23 @@ export async function geminiGenerate(
   timeoutMs = 20_000,
 ): Promise<unknown> {
   const start = liveModel || geminiModel();
-  const models = [start, ...GEMINI_FALLBACKS.filter((model) => model !== start)];
+  // One spare model. Walking the whole list while Gemini is busy blocks search.
+  const models = [start, ...GEMINI_FALLBACKS.filter((model) => model !== start)].slice(0, 2);
   let lastError = "Gemini request failed.";
   for (const model of models) {
     const requestBody = /lite/i.test(model) ? withoutThinking(body) : body;
-    for (let attempt = 0; attempt < 2; attempt++) {
-      try {
-        const result = await callGemini(requestBody, model, timeoutMs);
-        if (result.ok) {
-          liveModel = model;
-          return result.payload;
-        }
-        lastError = geminiErrorMessage(result.payload, result.status);
-        if (result.status === 400 && requestBody !== body) break;
-        if (!geminiRetryable(result.status, lastError)) {
-          if (result.status === 400 && requestBody === body) {
-            const plain = await callGemini(withoutThinking(body), model, timeoutMs);
-            if (plain.ok) {
-              liveModel = model;
-              return plain.payload;
-            }
-            lastError = geminiErrorMessage(plain.payload, plain.status);
-          }
-          break;
-        }
-      } catch (error) {
-        lastError = error instanceof Error ? error.message : "Gemini request failed.";
-        if (!/timeout|aborted|unavailable|high demand|fetch failed/i.test(lastError)) {
-          throw error instanceof Error ? error : new Error(lastError);
-        }
+    try {
+      const result = await callGemini(requestBody, model, timeoutMs);
+      if (result.ok) {
+        liveModel = model;
+        return result.payload;
       }
-      if (attempt === 0) {
-        await new Promise((resolve) => setTimeout(resolve, 700));
+      lastError = geminiErrorMessage(result.payload, result.status);
+      if (!geminiRetryable(result.status, lastError)) break;
+    } catch (error) {
+      lastError = error instanceof Error ? error.message : "Gemini request failed.";
+      if (!/timeout|aborted|unavailable|high demand|fetch failed/i.test(lastError)) {
+        throw error instanceof Error ? error : new Error(lastError);
       }
     }
     console.error(`[gemini] ${model} unavailable, trying the next model`);
@@ -196,7 +185,7 @@ export async function geminiGenerate(
   throw new Error(lastError);
 }
 
-async function geminiJson(system: string, user: string): Promise<unknown> {
+async function geminiJson(system: string, user: string, timeoutMs = 8_000): Promise<unknown> {
   const payload = await geminiGenerate({
     systemInstruction: { parts: [{ text: system }] },
     contents: [{ role: "user", parts: [{ text: user }] }],
@@ -205,7 +194,7 @@ async function geminiJson(system: string, user: string): Promise<unknown> {
       responseMimeType: "application/json",
       thinkingConfig: { thinkingBudget: 0 },
     },
-  }, 8_000);
+  }, timeoutMs);
   const text = geminiText(payload);
   if (!text) {
     throw new Error("Gemini returned an empty response.");
@@ -271,9 +260,9 @@ export function hasLlmAccess(): boolean {
   );
 }
 
-export async function completeJson(system: string, user: string): Promise<unknown> {
+export async function completeJson(system: string, user: string, timeoutMs = 8_000): Promise<unknown> {
   if (getGeminiApiKey()) {
-    return geminiJson(system, user);
+    return geminiJson(system, user, timeoutMs);
   }
 
   const openaiKey = process.env.OPENAI_API_KEY?.trim();

@@ -1,5 +1,5 @@
 import { registerProductSource } from "@/lib/sources/registry";
-import type { ListingHit, SourceQuery } from "@/lib/sources/types";
+import type { ListingHit, ProductSource, SourceQuery } from "@/lib/sources/types";
 import { toPence } from "@/lib/pagePrice";
 import { normalizeListingUrl } from "@/lib/webSearch";
 
@@ -8,7 +8,7 @@ function serpKey(): string | undefined {
   return key || undefined;
 }
 
-registerProductSource({
+export const serpapiSource: ProductSource = {
   id: "serpapi",
   enabled: () => Boolean(serpKey()),
   async search(input: SourceQuery): Promise<ListingHit[]> {
@@ -51,4 +51,5 @@ registerProductSource({
     }
     return hits;
   },
-});
+};
+registerProductSource(serpapiSource);

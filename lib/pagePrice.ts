@@ -1,3 +1,4 @@
+import { execFile } from "node:child_process";
 import zlib from "node:zlib";
 
 const BROWSER_HEADERS = {
@@ -238,6 +239,52 @@ function getHttps() {
   return require("node:https") as typeof import("node:https");
 }
 
+/** Amazon answers node’s TLS handshake with a 503 and a real browser fetch with the page. */
+function fetchViaCurl(url: string, timeoutMs: number): Promise<string | undefined> {
+  return new Promise((resolve) => {
+    execFile(
+      "curl",
+      [
+        "-sS",
+        "-L",
+        "--compressed",
+        "--max-time",
+        String(Math.max(3, Math.ceil(timeoutMs / 1000))),
+        "-A",
+        BROWSER_HEADERS["User-Agent"],
+        "-H",
+        "Accept-Language: en-GB,en;q=0.9",
+        "-w",
+        "\n%{http_code}",
+        "--",
+        url,
+      ],
+      { maxBuffer: 8 * 1024 * 1024, encoding: "buffer", timeout: timeoutMs + 1_000 },
+      (error, stdout) => {
+        if (error || !stdout || stdout.length < 50) {
+          resolve(undefined);
+          return;
+        }
+        const text = stdout.toString("utf8");
+        const split = text.lastIndexOf("\n");
+        const status = Number(text.slice(split + 1).trim());
+        const html = split >= 0 ? text.slice(0, split) : text;
+        lastMerchantFetch = {
+          url,
+          status: Number.isFinite(status) ? status : 0,
+          length: html.length,
+          error: status >= 400 ? `http ${status}` : "",
+        };
+        if (!status || status >= 400 || (/amazon\./i.test(url) && amazonBlocked(html))) {
+          resolve(undefined);
+          return;
+        }
+        resolve(html);
+      },
+    );
+  });
+}
+
 function fetchMerchantHtmlOnce(
   url: string,
   timeoutMs = 15_000,
@@ -309,12 +356,16 @@ export async function fetchMerchantHtml(
   url: string,
   timeoutMs = 15_000,
 ): Promise<string | undefined> {
-  const first = await fetchMerchantHtmlOnce(url, timeoutMs);
-  if (first || !/amazon\./i.test(url) || lastMerchantFetch.error !== "blocked") {
-    return first;
+  if (/amazon\./i.test(url)) {
+    const viaCurl = await fetchViaCurl(url, timeoutMs);
+    if (viaCurl) return viaCurl;
   }
-  await new Promise((resolve) => setTimeout(resolve, 500));
-  return fetchMerchantHtmlOnce(url, timeoutMs);
+  const first = await fetchMerchantHtmlOnce(url, timeoutMs);
+  if (first) return first;
+  if (lastMerchantFetch.error === "blocked" || /http 5/.test(lastMerchantFetch.error)) {
+    return fetchViaCurl(url, timeoutMs);
+  }
+  return undefined;
 }
 
 export async function fetchVerifiedListing(

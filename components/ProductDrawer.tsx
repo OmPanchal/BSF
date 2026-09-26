@@ -161,60 +161,82 @@ export function ProductDrawer({
                   {audit.sourceCount} sources · {audit.confidence} confidence
                 </span>
               </div>
-              {audit.status !== "complete" ? (
+              {audit.status !== "complete" && (audit.pros.length > 0 || audit.concerns.length > 0) ? (
                 <p className="mb-2 inline-block rounded bg-amber-100 px-2 py-1 text-[11px] font-semibold text-amber-900">
                   {audit.status === "error"
                     ? "Evidence lookup failed"
                     : "Limited independent evidence"}
                 </p>
               ) : null}
-              <p className="text-[15px] leading-6 text-[#45474a]">{audit.verdict}</p>
-              <div className="mt-4">
-                <p className="text-[11px] font-bold uppercase tracking-wide">
-                  Pros
-                </p>
-                <ul className="mt-1 list-disc space-y-1 pl-5 text-[13px] leading-5">
-                  {audit.pros.map((claim) => (
-                    <li key={claim.text}>
-                      {claim.text}
-                      {claim.evidenceUrls.map((url) => (
-                        <a
-                          key={url}
-                          href={url}
-                          target="_blank"
-                          rel="noreferrer"
-                          className="ml-1 font-semibold text-[#1c1917] underline"
-                        >
-                          [{sourceNumber(audit.sources, url)}]
-                        </a>
-                      ))}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-              <div className="mt-3">
-                <p className="text-[11px] font-bold uppercase tracking-wide text-amber-800">
-                  Concerns
-                </p>
-                <ul className="mt-1 list-disc space-y-1 pl-5 text-[13px] leading-5">
-                  {audit.concerns.map((claim) => (
-                    <li key={claim.text}>
-                      {claim.text}
-                      {claim.evidenceUrls.map((url) => (
-                        <a
-                          key={url}
-                          href={url}
-                          target="_blank"
-                          rel="noreferrer"
-                          className="ml-1 font-semibold text-[#1c1917] underline"
-                        >
-                          [{sourceNumber(audit.sources, url)}]
-                        </a>
-                      ))}
-                    </li>
-                  ))}
-                </ul>
-              </div>
+              {audit.pros.length === 0 && audit.concerns.length === 0 ? (
+                <div className="rounded-lg border border-amber-200 bg-amber-50 px-4 py-3">
+                  <p className="text-sm font-bold text-amber-950">No pros or cons</p>
+                  <p className="mt-1 text-[13px] leading-5 text-amber-900">
+                    The pages we checked did not support a pros and cons list for this product.
+                  </p>
+                </div>
+              ) : (
+                <>
+                  <p className="text-[15px] leading-6 text-[#45474a]">{audit.verdict}</p>
+                  <div className="mt-4">
+                    <p className="text-[11px] font-bold uppercase tracking-wide">Pros</p>
+                    {audit.pros.length > 0 ? (
+                      <ul className="mt-1 list-disc space-y-1 pl-5 text-[13px] leading-5">
+                        {audit.pros.map((claim) => (
+                          <li key={claim.text}>
+                            {claim.text}
+                            {claim.evidenceUrls.map((url) => (
+                              <a
+                                key={url}
+                                href={url}
+                                target="_blank"
+                                rel="noreferrer"
+                                className="ml-1 font-semibold text-[#1c1917] underline"
+                              >
+                                [{sourceNumber(audit.sources, url)}]
+                              </a>
+                            ))}
+                          </li>
+                        ))}
+                      </ul>
+                    ) : (
+                      <p className="mt-1 text-[13px] leading-5 text-[#78716c]">
+                        No pros were found in the reviews.
+                      </p>
+                    )}
+                  </div>
+                  <div className="mt-3">
+                    <p className="text-[11px] font-bold uppercase tracking-wide text-amber-800">
+                      Concerns
+                    </p>
+                    {audit.concerns.length > 0 ? (
+                      <ul className="mt-1 list-disc space-y-1 pl-5 text-[13px] leading-5">
+                        {audit.concerns.map((claim) => (
+                          <li key={claim.text}>
+                            {claim.text}
+                            {claim.evidenceUrls.map((url) => (
+                              <a
+                                key={url}
+                                href={url}
+                                target="_blank"
+                                rel="noreferrer"
+                                className="ml-1 font-semibold text-[#1c1917] underline"
+                              >
+                                [{sourceNumber(audit.sources, url)}]
+                              </a>
+                            ))}
+                          </li>
+                        ))}
+                      </ul>
+                    ) : (
+                      <p className="mt-1 text-[13px] leading-5 text-[#78716c]">
+                        No concerns were found in the reviews.
+                      </p>
+                    )}
+                  </div>
+                </>
+              )}
+              {audit.sources.length > 0 && (
               <div className="mt-4 space-y-2">
                 {audit.sources.map((source, index) => (
                   <a
@@ -237,13 +259,19 @@ export function ProductDrawer({
                   </a>
                 ))}
               </div>
+              )}
             </div>
           ) : (
-            <p className="text-sm text-[#45474a]">
-              {evidenceLoading
-                ? "Checking independent evidence…"
-                : "No evidence snapshot for this product yet."}
-            </p>
+            <div className="rounded-lg border border-[#e7e5e4] bg-[#fafaf9] px-4 py-3">
+              <p className="text-sm font-bold text-[#1c1917]">
+                {evidenceLoading ? "Checking reviews" : "No pros or cons yet"}
+              </p>
+              <p className="mt-1 text-[13px] leading-5 text-[#57534e]">
+                {evidenceLoading
+                  ? "Pros and cons will show here once the review pages have been read."
+                  : "This product has no pros and cons list. Reviews were not available to summarise."}
+              </p>
+            </div>
           )}
         </div>
 
