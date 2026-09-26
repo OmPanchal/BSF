@@ -1,14 +1,14 @@
 @import "tailwindcss";
 
 :root {
-  --background: #f7f9fb;
-  --foreground: #191c1e;
+  --background: #fffaf5;
+  --foreground: #1c0a02;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --color-surface: #f7f9fb;
+  --color-surface: #fffaf5;
   --color-surface-lowest: #ffffff;
   --color-surface-container: #eceef0;
   --color-surface-high: #e6e8ea;
@@ -16,7 +16,7 @@
   --color-muted: #45474a;
   --color-outline: #c6c6ca;
   --color-primary: #000000;
-  --color-secondary: #0051d5;
+  --color-secondary: #ff6a00;
   --font-sans: var(--font-plus-jakarta);
 }
 
@@ -44,6 +44,53 @@ body {
 
 .btn-press:active:not(:disabled) {
   transform: scale(0.96);
+}
+
+@keyframes blob-drift {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+  50% {
+    transform: translate3d(40px, -30px, 0) scale(1.12);
+  }
+}
+
+@keyframes blob-drift-alt {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+  50% {
+    transform: translate3d(-50px, 24px, 0) scale(1.08);
+  }
+}
+
+.animate-blob {
+  animation: blob-drift 8s ease-in-out infinite;
+}
+
+.animate-blob-alt {
+  animation: blob-drift-alt 10s ease-in-out infinite;
+}
+
+.animate-blob-slow {
+  animation: blob-drift 12s ease-in-out infinite reverse;
+}
+
+@keyframes bar-settle {
+  from {
+    opacity: 0;
+    transform: translateY(34vh) scale(1.03);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.animate-bar-settle {
+  animation: bar-settle 0.7s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
 @keyframes fade-up {
@@ -167,7 +214,11 @@ body {
   .animate-icon-pulse,
   .animate-overlay-in,
   .animate-drawer-in,
-  .animate-modal-in {
+  .animate-modal-in,
+  .animate-blob,
+  .animate-blob-alt,
+  .animate-blob-slow,
+  .animate-bar-settle {
     animation: none;
     transition: none;
     transform: none;

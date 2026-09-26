@@ -1,7 +1,7 @@
 export function SearchSkeletons() {
   return (
-    <div className="mb-6 grid max-w-4xl grid-cols-1 gap-4 md:grid-cols-2">
-      {[0, 1].map((index) => (
+    <div className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
+      {[0, 1, 2].map((index) => (
         <div
           key={index}
           className="animate-fade-up rounded-xl border border-[#c6c6ca]/30 bg-white p-3"

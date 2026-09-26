@@ -7,6 +7,7 @@ type IntentBarProps = {
   onChange: (value: string) => void;
   onSubmit: () => void;
   loading: boolean;
+  compact?: boolean;
 };
 
 const SEARCH_STEPS = [
@@ -20,6 +21,7 @@ export function IntentBar({
   onChange,
   onSubmit,
   loading,
+  compact = false,
 }: IntentBarProps) {
   const [step, setStep] = useState(0);
 
@@ -36,78 +38,69 @@ export function IntentBar({
 
   return (
     <form
-      className="w-full"
+      className={`w-full ${compact ? "max-w-none" : "max-w-3xl"}`}
       onSubmit={(event) => {
         event.preventDefault();
         onSubmit();
       }}
     >
-      <label
-        className="mb-3 block text-center text-lg font-bold tracking-tight md:text-xl"
-        htmlFor="buyer-intent"
-      >
+      <label className="sr-only" htmlFor="buyer-intent">
         What should your bot buy?
       </label>
       <div
-        className={`relative flex h-[72px] items-center overflow-hidden rounded-2xl border-2 bg-white pl-5 pr-3 shadow-[0_12px_32px_rgba(15,23,42,0.16)] ring-4 transition-[border-color,box-shadow] duration-300 ${
-          loading
-            ? "border-[#0051d5] ring-[#0051d5]/15"
-            : "border-black ring-black/5 focus-within:ring-black/10"
+        className={`relative overflow-hidden rounded-[28px] border border-white bg-white shadow-[0_24px_70px_rgba(90,50,140,0.18)] transition-shadow duration-300 hover:shadow-[0_28px_80px_rgba(90,50,140,0.24)] ${
+          loading ? "ring-2 ring-[#c4b5fd]" : ""
         }`}
       >
         {loading ? (
-          <span className="pointer-events-none absolute inset-x-0 bottom-0 h-[3px] overflow-hidden bg-[#dbe1ff]">
-            <span className="animate-search-scan absolute inset-y-0 w-1/3 rounded-full bg-[#0051d5]" />
+          <span className="pointer-events-none absolute inset-x-0 top-0 h-1 overflow-hidden bg-[#ede9fe]">
+            <span className="animate-search-scan absolute inset-y-0 w-1/3 rounded-full bg-gradient-to-r from-[#7eb6ff] via-[#c4b5fd] to-[#ff7ad9]" />
           </span>
         ) : null}
-        <span
-          className={`material-symbols-outlined mr-3 shrink-0 text-[28px] text-[#0051d5] ${
-            loading ? "animate-icon-pulse" : ""
-          }`}
-        >
-          {loading ? "radar" : "search"}
-        </span>
         <input
           id="buyer-intent"
-          className="h-full w-full bg-transparent text-base font-medium text-[#191c1e] outline-none placeholder:font-normal placeholder:text-[#45474a]/70"
+          className={`w-full bg-transparent text-base text-[#1c1917] outline-none placeholder:text-[#a8a29e] ${
+            compact ? "px-5 pb-1 pt-3" : "px-6 pb-2 pt-5"
+          }`}
           value={value}
           onChange={(event) => onChange(event.target.value)}
-          placeholder="Search products, e.g. workout earbuds under £100 with secure fit..."
+          placeholder="Workout earbuds under £100, secure fit, sweat resistance…"
           disabled={loading}
         />
-        {value && !loading ? (
-          <button
-            type="button"
-            aria-label="Clear search"
-            className="btn-press mr-2 flex shrink-0 items-center justify-center rounded-full p-1 text-[#45474a] hover:bg-[#eceef0] hover:text-[#191c1e]"
-            onClick={() => onChange("")}
-          >
-            <span className="material-symbols-outlined text-[20px]">close</span>
-          </button>
-        ) : null}
-        <button
-          type="submit"
-          disabled={loading}
-          className="btn-press flex h-12 shrink-0 items-center justify-center gap-1.5 rounded-xl bg-black px-5 text-sm font-bold text-white hover:bg-[#45474a] disabled:opacity-80"
-        >
-          <span
-            className={`material-symbols-outlined text-[20px] ${
-              loading ? "animate-spin-slow" : ""
-            }`}
-          >
-            {loading ? "progress_activity" : "search"}
-          </span>
-          {loading ? "Searching…" : "Search"}
-        </button>
+        <div className={`flex items-center justify-between px-4 ${compact ? "pb-3 pt-1" : "pb-4 pt-2"}`}>
+          <p className="pl-2 text-sm text-[#78716c]" aria-live="polite">
+            {loading ? SEARCH_STEPS[step] : "Search the catalogue"}
+          </p>
+          <div className="flex items-center gap-2">
+            {value && !loading ? (
+              <button
+                type="button"
+                aria-label="Clear search"
+                className="btn-press flex h-9 w-9 items-center justify-center rounded-full text-[#78716c] hover:bg-[#f5f5f4]"
+                onClick={() => onChange("")}
+              >
+                <span className="material-symbols-outlined text-[18px]">
+                  close
+                </span>
+              </button>
+            ) : null}
+            <button
+              type="submit"
+              disabled={loading}
+              aria-label={loading ? "Searching" : "Search"}
+              className="btn-press flex h-10 w-10 items-center justify-center rounded-full bg-[#1c1917] text-white hover:bg-black disabled:opacity-70"
+            >
+              <span
+                className={`material-symbols-outlined text-[20px] ${
+                  loading ? "animate-spin-slow" : ""
+                }`}
+              >
+                {loading ? "progress_activity" : "arrow_upward"}
+              </span>
+            </button>
+          </div>
+        </div>
       </div>
-      <p
-        className={`mt-3 h-5 text-center text-sm font-semibold text-[#0051d5] transition-opacity duration-200 ${
-          loading ? "opacity-100" : "opacity-0"
-        }`}
-        aria-live="polite"
-      >
-        {loading ? SEARCH_STEPS[step] : "\u00a0"}
-      </p>
     </form>
   );
 }

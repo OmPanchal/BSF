@@ -1,7 +1,6 @@
 "use client";
 
 import type { AgentTask, Product } from "@/types/contracts";
-import Image from "next/image";
 
 type AgentTimelineProps = {
   task: AgentTask;
@@ -10,64 +9,38 @@ type AgentTimelineProps = {
 
 export function AgentTimeline({ task, selectedProduct }: AgentTimelineProps) {
   return (
-    <section className="overflow-hidden rounded-2xl border border-[#c6c6ca]/30 bg-white shadow-sm">
-      <div className="flex flex-col md:flex-row">
-        <div className="flex items-center gap-4 bg-[#dbe1ff]/50 p-4 md:w-72 md:flex-col md:items-start">
-          {selectedProduct?.imageUrl ? (
-            <div className="relative h-20 w-20 shrink-0 overflow-hidden rounded-xl bg-white md:h-36 md:w-full">
-              <Image
-                src={selectedProduct.imageUrl}
-                alt={`${selectedProduct.brand} ${selectedProduct.name}`}
-                fill
-                className="object-cover"
-                sizes="288px"
-              />
-            </div>
-          ) : null}
-          <div>
-            <p className="text-[11px] font-bold uppercase tracking-wide text-[#0051d5]">
-              Chosen for this buyer
-            </p>
-            <p className="mt-1 text-lg font-bold">
-              {selectedProduct
-                ? `${selectedProduct.brand} ${selectedProduct.name}`
-                : "Recommendation"}
-            </p>
-          </div>
-        </div>
-        <div className="flex-1 p-4">
-          <div className="mb-3 flex flex-wrap items-center gap-2">
-            <h2 className="text-xl font-bold">Recommendation</h2>
-            {task.agentMode === "demo-simulation" ? (
-              <span className="rounded-lg bg-[#eceef0] px-2 py-1 text-[11px] font-bold text-[#45474a]">
-                Simulated agent walkthrough
-              </span>
-            ) : (
-              <span className="rounded-lg bg-[#dbe1ff] px-2 py-1 text-[11px] font-bold text-[#0051d5]">
-                Grok Bot
-              </span>
-            )}
-          </div>
-          {task.rationale ? (
-            <p className="text-[15px] leading-6 text-[#45474a]">
-              {task.rationale}
-            </p>
-          ) : null}
-          <ol className="mt-4 flex flex-col gap-2">
-            {task.events.map((event) => (
-              <li
-                key={event.step}
-                className="flex items-start gap-2 text-[13px] text-[#45474a]"
-              >
-                <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-[#0051d5] text-[11px] font-bold text-white">
-                  {event.step}
-                </span>
-                <span className="pt-0.5">{event.message}</span>
-              </li>
-            ))}
-          </ol>
-        </div>
+    <section className="rounded-[28px] bg-white p-6 text-[#1c1917] shadow-[0_18px_50px_rgba(80,40,20,0.08)] md:p-8">
+      <div className="mb-3 flex flex-wrap items-center gap-2">
+        <h2 className="text-2xl font-extrabold tracking-tight">
+          {selectedProduct ? "Recommendation" : "Agent notes"}
+        </h2>
+        <span className="rounded-full bg-[#f5f5f4] px-3 py-1 text-[11px] font-semibold text-[#57534e]">
+          {task.agentMode === "demo-simulation"
+            ? "Simulated agent walkthrough"
+            : "Grok Bot"}
+        </span>
       </div>
+      {selectedProduct ? (
+        <p className="mb-3 text-sm font-semibold text-[#1c1917]">
+          {selectedProduct.brand} {selectedProduct.name}
+        </p>
+      ) : null}
+      {task.rationale ? (
+        <p className="text-base leading-7 text-[#57534e]">{task.rationale}</p>
+      ) : null}
+      <ol className="mt-6 grid gap-3 sm:grid-cols-2">
+        {task.events.map((event) => (
+          <li
+            key={event.step}
+            className="rounded-2xl bg-[#fafaf9] p-3 text-sm leading-5 text-[#57534e]"
+          >
+            <span className="mb-2 flex h-7 w-7 items-center justify-center rounded-full bg-[#1c1917] text-xs font-semibold text-white">
+              {event.step}
+            </span>
+            {event.message}
+          </li>
+        ))}
+      </ol>
     </section>
   );
 }

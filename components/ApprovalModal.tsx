@@ -20,7 +20,7 @@ export function ApprovalModal({ product, onClose }: ApprovalModalProps) {
         aria-labelledby="approval-title"
         className="animate-modal-in flex w-full max-w-md flex-col items-center rounded-2xl bg-white p-10 text-center shadow-2xl"
       >
-        <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-[#dbe1ff] text-[#0051d5]">
+        <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-[#f5f5f4] text-[#1c1917]">
           <span
             className="material-symbols-outlined text-[36px]"
             style={{ fontVariationSettings: "'FILL' 1" }}
@@ -48,14 +48,14 @@ export function ApprovalModal({ product, onClose }: ApprovalModalProps) {
             href={product.merchantUrl}
             target="_blank"
             rel="noreferrer"
-            className="btn-press flex h-12 items-center justify-center rounded-lg bg-black text-sm font-bold text-white hover:bg-[#45474a]"
+            className="btn-press flex h-12 items-center justify-center rounded-full bg-[#1c1917] text-sm font-semibold text-white hover:bg-black"
           >
             Open merchant checkout
           </a>
           <button
             type="button"
             onClick={onClose}
-            className="btn-press h-12 rounded-lg bg-[#eceef0] text-sm font-semibold hover:bg-[#e6e8ea]"
+            className="btn-press h-12 rounded-full bg-[#f5f5f4] text-sm font-semibold text-[#1c1917] hover:bg-[#e7e5e4]"
           >
             Cancel
           </button>

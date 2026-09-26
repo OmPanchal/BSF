@@ -33,84 +33,82 @@ export function ProductCard({
 
   return (
     <article
-      className={`btn-press group relative flex cursor-pointer flex-col rounded-xl bg-white p-3 shadow-sm hover:shadow-md ${
-        recommended
-          ? "border-2 border-[#0051d5] shadow-[0_8px_24px_rgba(0,81,213,0.12)]"
-          : hasConcerns
-            ? "border border-[#c6c6ca]/30 border-t-4 border-t-amber-500"
-            : "border border-[#c6c6ca]/30"
-      }`}
+      className="btn-press group relative flex h-full cursor-pointer flex-col overflow-hidden rounded-[28px] bg-white shadow-[0_18px_50px_rgba(80,40,20,0.08)] hover:shadow-[0_22px_60px_rgba(80,40,20,0.14)]"
       onClick={onOpen}
     >
-      <div className="relative mb-3 aspect-[16/10] overflow-hidden rounded-lg bg-[#eceef0]">
+      <div className="relative aspect-[16/9] overflow-hidden bg-[#f5f5f4]">
         {product.imageUrl ? (
           <Image
             src={product.imageUrl}
             alt={`${product.brand} ${product.name}`}
             fill
             className="object-cover transition-transform duration-500 group-hover:scale-105"
-            sizes="(max-width: 768px) 100vw, 400px"
+            sizes="(max-width: 768px) 100vw, 480px"
           />
         ) : null}
-        <div className="absolute left-2 top-2 rounded bg-white/90 px-2 py-0.5 text-[10px] font-bold tracking-wide backdrop-blur-md">
-          {product.brand}
-        </div>
-        {recommended ? (
-          <div className="absolute right-2 top-2 rounded bg-[#0051d5] px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-white">
-            Best match
+        {recommended || hasConcerns || audit ? (
+          <div
+            className={`absolute left-3 top-3 rounded-full px-3 py-1 text-[11px] font-semibold ${
+              recommended
+                ? "bg-[#1c1917] text-white"
+                : hasConcerns
+                  ? "bg-white/90 text-[#9d174d]"
+                  : "bg-white/90 text-[#57534e]"
+            }`}
+          >
+            {recommended
+              ? "Recommended"
+              : hasConcerns
+                ? `${audit?.concerns.length ?? 0} concern${audit?.concerns.length === 1 ? "" : "s"}`
+                : audit?.confidence}
           </div>
         ) : null}
       </div>
-      {audit ? (
-        <div className="mb-2 flex items-center justify-between gap-2 text-[11px] font-bold">
-          <span className="flex items-center gap-1">
-            <span className="inline-block h-1.5 w-1.5 rounded-full bg-[#0051d5]" />
-            {audit.confidence} confidence
-          </span>
-          {recommended ? (
-            <span className="text-[#0051d5]">Best match</span>
-          ) : (
-            <span className="font-medium text-[#45474a]">Candidate</span>
-          )}
-        </div>
-      ) : null}
-      <h3 className="line-clamp-1 text-base font-bold group-hover:text-[#0051d5]">
-        {product.brand} {product.name}
-      </h3>
-      <p className="mt-0.5 line-clamp-1 text-xs text-[#45474a]">
-        {ip ? `${ip} · ` : null}
-        {highlight}
-      </p>
-      {audit ? (
-        <p className="mt-1 line-clamp-2 text-xs leading-4 text-[#45474a]">
-          {audit.verdict}
+      <div className="flex flex-1 flex-col p-5">
+        <p className="text-xs font-medium text-[#78716c]">
+          {product.brand}
+          {audit ? ` · ${audit.confidence} confidence` : ""}
         </p>
-      ) : null}
-      <div className="mb-3 mt-2 flex items-baseline gap-1">
-        <span className="text-lg font-extrabold">
-          {gbp.format(product.pricePence / 100)}
-        </span>
-        <span className="text-[11px] text-[#45474a]">snapshot</span>
-      </div>
-      <div
-        className="mt-auto grid grid-cols-2 gap-2"
-        onClick={(event) => event.stopPropagation()}
-      >
-        <button
-          type="button"
-          className="btn-press h-9 rounded-lg bg-[#eceef0] px-2 text-center text-[11px] font-semibold hover:bg-[#e6e8ea]"
-          onClick={onOpen}
+        <h3 className="mt-1 text-2xl font-extrabold tracking-tight text-[#1c1917]">
+          {product.name}
+        </h3>
+        <p className="mt-1 text-sm text-[#78716c]">
+          {ip ? `${ip} · ` : null}
+          {highlight}
+        </p>
+        {audit ? (
+          <p className="mt-3 line-clamp-3 text-sm leading-5 text-[#44403c]">
+            {audit.verdict}
+          </p>
+        ) : null}
+        <div className="mb-4 mt-4 flex items-baseline gap-2">
+          <span className="text-3xl font-extrabold tracking-tight">
+            {gbp.format(product.pricePence / 100)}
+          </span>
+          <span className="text-xs text-[#a8a29e]">
+            snapshot
+          </span>
+        </div>
+        <div
+          className="mt-auto grid grid-cols-2 gap-2"
+          onClick={(event) => event.stopPropagation()}
         >
-          View details
-        </button>
-        <button
-          type="button"
-          className="btn-press flex h-9 items-center justify-center gap-1 rounded-lg bg-black px-2 text-[11px] font-bold text-white hover:bg-[#45474a]"
-          onClick={onBuy}
-        >
-          <span className="material-symbols-outlined text-[16px]">bolt</span>
-          Buy now
-        </button>
+          <button
+            type="button"
+            className="btn-press h-10 rounded-full border border-[#e7e5e4] text-xs font-semibold text-[#1c1917] hover:bg-[#fafaf9]"
+            onClick={onOpen}
+          >
+            View details
+          </button>
+          <button
+            type="button"
+            className="btn-press flex h-10 items-center justify-center gap-1 rounded-full bg-[#1c1917] px-2 text-xs font-semibold text-white hover:bg-black"
+            onClick={onBuy}
+          >
+            <span className="material-symbols-outlined text-[16px]">bolt</span>
+            Buy now
+          </button>
+        </div>
       </div>
     </article>
   );

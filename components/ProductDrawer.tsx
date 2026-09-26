@@ -50,7 +50,7 @@ export function ProductDrawer({
         aria-labelledby="drawer-title"
       >
         <div className="sticky top-0 z-10 flex items-center justify-between bg-white/90 p-4 backdrop-blur-md">
-          <span className="text-xs font-semibold uppercase tracking-wider text-[#0051d5]">
+          <span className="text-xs font-semibold uppercase tracking-wider text-[#1c1917]">
             {product.id}
             {recommended ? " · recommended" : ""}
           </span>
@@ -93,7 +93,7 @@ export function ProductDrawer({
               <span className="text-2xl font-extrabold">
                 {gbp.format(product.pricePence / 100)}
               </span>
-              <span className="rounded bg-[#eceef0] px-2 py-1 text-[11px] font-semibold text-[#0051d5]">
+              <span className="rounded bg-[#eceef0] px-2 py-1 text-[11px] font-semibold text-[#1c1917]">
                 Price snapshot — may change
               </span>
             </div>
@@ -159,7 +159,7 @@ export function ProductDrawer({
                           href={url}
                           target="_blank"
                           rel="noreferrer"
-                          className="ml-1 font-semibold text-[#0051d5] underline"
+                          className="ml-1 font-semibold text-[#1c1917] underline"
                         >
                           [{index + 1}]
                         </a>
@@ -182,7 +182,7 @@ export function ProductDrawer({
                           href={url}
                           target="_blank"
                           rel="noreferrer"
-                          className="ml-1 font-semibold text-[#0051d5] underline"
+                          className="ml-1 font-semibold text-[#1c1917] underline"
                         >
                           [{index + 1}]
                         </a>
@@ -204,7 +204,7 @@ export function ProductDrawer({
                     <p className="mt-1 text-[13px] text-[#45474a]">
                       {source.excerpt}
                     </p>
-                    <p className="mt-1 text-[11px] uppercase text-[#0051d5]">
+                    <p className="mt-1 text-[11px] uppercase text-[#1c1917]">
                       {source.sourceType}
                     </p>
                   </a>
@@ -223,13 +223,13 @@ export function ProductDrawer({
             href={product.merchantUrl}
             target="_blank"
             rel="noreferrer"
-            className="btn-press flex h-12 items-center justify-center rounded-lg border border-[#191c1e] px-4 text-sm font-semibold hover:bg-[#f7f9fb]"
+            className="btn-press flex h-12 items-center justify-center rounded-full border border-[#e7e5e4] px-4 text-sm font-semibold text-[#1c1917] hover:bg-[#fafaf9]"
           >
             Merchant listing
           </a>
           <button
             type="button"
-            className="btn-press flex h-12 flex-1 items-center justify-center gap-1 rounded-lg bg-black text-sm font-bold text-white shadow-md hover:bg-[#45474a]"
+            className="btn-press flex h-12 flex-1 items-center justify-center gap-1 rounded-full bg-[#1c1917] text-sm font-semibold text-white hover:bg-black"
             onClick={onBuy}
           >
             <span className="material-symbols-outlined text-[20px]">
