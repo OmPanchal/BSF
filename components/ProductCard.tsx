@@ -80,6 +80,18 @@ export function ProductCard({
           {ip ? `${ip} · ` : null}
           {highlight}
         </p>
+        {product.match?.kind === "similar" && product.match.notes.length > 0 ? (
+          <ul className="mt-3 flex flex-wrap gap-1.5">
+            {product.match.notes.map((note) => (
+              <li
+                key={note}
+                className="rounded-full bg-amber-50 px-2.5 py-1 text-[11px] font-semibold text-amber-900"
+              >
+                {note}
+              </li>
+            ))}
+          </ul>
+        ) : null}
         {audit ? (
           <p className="mt-3 line-clamp-3 text-sm leading-5 text-[#44403c]">
             {audit.verdict}

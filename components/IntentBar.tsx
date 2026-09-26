@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 type IntentBarProps = {
   value: string;
@@ -11,10 +11,26 @@ type IntentBarProps = {
 };
 
 const SEARCH_STEPS = [
-  "Matching the catalogue…",
+  "Reading your request…",
+  "Searching UK listings…",
+  "Filtering out accessories and off-budget items…",
+  "Confirming prices on merchant pages…",
   "Checking independent evidence…",
-  "Comparing fit and budget…",
 ];
+
+// Mounted only while loading, so every search starts from the first step.
+function SearchStatus() {
+  const [step, setStep] = useState(0);
+
+  useEffect(() => {
+    const timer = window.setInterval(() => {
+      setStep((current) => Math.min(current + 1, SEARCH_STEPS.length - 1));
+    }, 1800);
+    return () => window.clearInterval(timer);
+  }, []);
+
+  return <>{SEARCH_STEPS[step]}</>;
+}
 
 export function IntentBar({
   value,
@@ -23,18 +39,7 @@ export function IntentBar({
   loading,
   compact = false,
 }: IntentBarProps) {
-  const [step, setStep] = useState(0);
-
-  useEffect(() => {
-    if (!loading) {
-      setStep(0);
-      return;
-    }
-    const timer = window.setInterval(() => {
-      setStep((current) => (current + 1) % SEARCH_STEPS.length);
-    }, 700);
-    return () => window.clearInterval(timer);
-  }, [loading]);
+  const selectedOnFocus = useRef(false);
 
   return (
     <form
@@ -64,12 +69,26 @@ export function IntentBar({
           }`}
           value={value}
           onChange={(event) => onChange(event.target.value)}
-          placeholder="Workout earbuds under £100, secure fit, sweat resistance…"
+          onFocus={(event) => {
+            // After a search, clicking the bar selects the old query so typing replaces it.
+            if (compact) {
+              event.currentTarget.select();
+              selectedOnFocus.current = true;
+            }
+          }}
+          onMouseUp={(event) => {
+            // Without this the click's mouseup moves the caret and drops the selection.
+            if (selectedOnFocus.current) {
+              event.preventDefault();
+              selectedOnFocus.current = false;
+            }
+          }}
+          placeholder="Wireless earbuds under £50, noise cancelling headphones £100–£200…"
           disabled={loading}
         />
         <div className={`flex items-center justify-between px-4 ${compact ? "pb-3 pt-1" : "pb-4 pt-2"}`}>
           <p className="pl-2 text-sm text-[#78716c]" aria-live="polite">
-            {loading ? SEARCH_STEPS[step] : "Search the catalogue"}
+            {loading ? <SearchStatus /> : "Search UK listings"}
           </p>
           <div className="flex items-center gap-2">
             {value && !loading ? (

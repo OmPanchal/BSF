@@ -7,14 +7,9 @@ import {
   rememberAudit,
   setAuditInflight,
 } from "@/lib/catalog";
-import { completeJson, hasLlmAccess } from "@/lib/llm";
-import { tavilySearch, type TavilyResult } from "@/lib/tavily";
-import type {
-  Claim,
-  Evidence,
-  Product,
-  SocialProofAudit,
-} from "@/types/contracts";
+import { completeJson, getGeminiApiKey } from "@/lib/llm";
+import { tavilySearch, getTavilyApiKey, type TavilyResult } from "@/lib/tavily";
+import type { Claim, Evidence, Product, SocialProofAudit } from "@/types/contracts";
 
 function sourceTypeFor(url: string): Evidence["sourceType"] {
   const host = (() => {
@@ -24,252 +19,225 @@ function sourceTypeFor(url: string): Evidence["sourceType"] {
       return "";
     }
   })();
-  if (host.includes("reddit.com") || host.includes("forum")) {
-    return "forum";
-  }
-  if (
-    host.includes("amazon.") ||
-    host.includes("argos.") ||
-    host.includes("johnlewis.") ||
-    host.includes("currys.")
-  ) {
-    return "retailer";
-  }
-  if (
-    host.includes("jabra.") ||
-    host.includes("sony.") ||
-    host.includes("apple.") ||
-    host.includes("bose.") ||
-    host.includes("sennheiser.")
-  ) {
-    return "manufacturer";
-  }
+  if (/reddit|forum|community/.test(host)) return "forum";
+  if (/amazon\.|argos\.|johnlewis\.|currys\./.test(host)) return "retailer";
+  if (/sony\.|apple\.|bose\.|jabra\.|sennheiser\./.test(host)) return "manufacturer";
   return "other";
 }
 
-function normalizeUrl(url: string): string {
-  try {
-    const parsed = new URL(url);
-    parsed.hash = "";
-    parsed.hostname = parsed.hostname.toLowerCase();
-    return parsed.toString();
-  } catch {
-    return url;
-  }
+function reviewQuery(product: Product): string {
+  const label = `${product.brand} ${product.name}`;
+  const model = label.match(/\b[A-Za-z]{0,8}-?\d[A-Za-z0-9-]{2,}\b/)?.[0];
+  const name = model ? `${product.brand} ${model}` : label.split(/\s+/).slice(0, 6).join(" ");
+  return `${name} review pros cons`;
+}
+
+function mentionsProduct(product: Product, result: TavilyResult): boolean {
+  const hay = `${result.title} ${result.content}`.toLowerCase().replace(/-/g, "");
+  const model = `${product.brand} ${product.name}`
+    .toLowerCase()
+    .replace(/-/g, "")
+    .match(/[a-z]*\d[a-z0-9]{3,}/)?.[0];
+  if (model && !/^(?:19|20)\d{2}$/.test(model) && !hay.includes(model)) return false;
+  const tokens = `${product.brand} ${product.name}`
+    .toLowerCase()
+    .split(/[^a-z0-9]+/)
+    .filter((token) => token.length > 3 && !/^(with|wireless|premium|black|white|noise)$/.test(token));
+  if (tokens.length === 0) return true;
+  const hits = tokens.filter((token) => hay.includes(token));
+  return hits.length >= Math.min(2, tokens.length);
 }
 
 function toEvidence(results: TavilyResult[]): Evidence[] {
   const seen = new Set<string>();
   const sources: Evidence[] = [];
   for (const result of results) {
-    const url = normalizeUrl(result.url);
-    if (seen.has(url) || !result.content.trim()) {
-      continue;
-    }
-    seen.add(url);
+    if (!result.url || !result.content.trim() || seen.has(result.url)) continue;
+    seen.add(result.url);
     sources.push({
-      url,
+      url: result.url,
       title: result.title,
-      excerpt: result.content.slice(0, 280),
-      sourceType: sourceTypeFor(url),
+      excerpt: result.content.slice(0, 320),
+      sourceType: sourceTypeFor(result.url),
       publishedAt: result.publishedDate,
     });
   }
-  return sources;
+  return sources.slice(0, 8);
 }
 
-function asClaims(value: unknown, allowedUrls: Set<string>): Claim[] {
-  if (!Array.isArray(value)) {
-    return [];
+function claimUrl(sources: Evidence[], item: Record<string, unknown>): string | undefined {
+  const index =
+    typeof item.source === "number"
+      ? item.source
+      : typeof item.source === "string"
+        ? Number(item.source)
+        : NaN;
+  if (Number.isInteger(index) && index >= 1 && index <= sources.length) {
+    return sources[index - 1]?.url;
   }
-  const claims: Claim[] = [];
-  for (const item of value) {
-    if (!item || typeof item !== "object") {
-      continue;
-    }
-    const text = "text" in item && typeof item.text === "string" ? item.text.trim() : "";
-    if (!text) {
-      continue;
-    }
-    const evidenceUrls = (
-      "evidenceUrls" in item && Array.isArray(item.evidenceUrls)
-        ? item.evidenceUrls.filter(
-            (url: unknown): url is string => typeof url === "string",
-          )
-        : []
-    ).filter(
-      (url: string) => allowedUrls.has(url) || allowedUrls.has(normalizeUrl(url)),
+  const urls = Array.isArray(item.evidenceUrls) ? item.evidenceUrls : [];
+  for (const url of urls) {
+    if (typeof url !== "string") continue;
+    const hit = sources.find(
+      (source) => source.url === url || source.url.replace(/\/$/, "") === url.replace(/\/$/, ""),
     );
-    if (evidenceUrls.length === 0) {
-      continue;
+    if (hit) return hit.url;
+  }
+  return undefined;
+}
+
+function overlapScore(text: string, source: Evidence): number {
+  const tokens = text.toLowerCase().split(/[^a-z0-9]+/).filter((token) => token.length > 3);
+  if (tokens.length === 0) return 0;
+  const hay = `${source.title} ${source.excerpt}`.toLowerCase();
+  return tokens.filter((token) => hay.includes(token)).length;
+}
+
+function citedUrl(text: string, sources: Evidence[], item: Record<string, unknown>): string | undefined {
+  const cited = claimUrl(sources, item);
+  let best: Evidence | undefined;
+  let bestScore = 0;
+  for (const source of sources) {
+    const score = overlapScore(text, source);
+    if (score > bestScore) {
+      best = source;
+      bestScore = score;
     }
-    const confidence =
-      "confidence" in item &&
-      (item.confidence === "low" ||
-        item.confidence === "medium" ||
-        item.confidence === "high")
-        ? item.confidence
-        : "low";
-    claims.push({ text, evidenceUrls, confidence });
   }
-  return claims;
+  const citedSource = cited ? sources.find((source) => source.url === cited) : undefined;
+  const citedScore = citedSource ? overlapScore(text, citedSource) : 0;
+  if (best && bestScore > citedScore) return best.url;
+  return cited ?? best?.url;
 }
 
-function confidenceFromSources(sourceCount: number): SocialProofAudit["confidence"] {
-  if (sourceCount >= 4) {
-    return "medium";
-  }
-  if (sourceCount >= 2) {
-    return "low";
-  }
-  return "low";
+function asClaims(value: unknown, sources: Evidence[]): Claim[] {
+  if (!Array.isArray(value)) return [];
+  return value
+    .flatMap((item) => {
+      if (!item || typeof item !== "object") return [];
+      const record = item as Record<string, unknown>;
+      const text = typeof record.text === "string" ? record.text.trim() : "";
+      const url = text ? citedUrl(text, sources, record) : undefined;
+      if (!text || !url) return [];
+      return [{ text, evidenceUrls: [url], confidence: "medium" as const }];
+    })
+    .slice(0, 4);
 }
 
-async function liveAudit(product: Product): Promise<SocialProofAudit> {
-  const modelLabel = `${product.brand} ${product.name}`.trim();
-  const queries = [
-    `"${modelLabel}" reliability reddit`,
-    `"${modelLabel}" problem forum`,
-    `"${modelLabel}" review`,
-  ];
-
-  const batches = await Promise.all(
-    queries.map((query) =>
-      tavilySearch(query, {
-        maxResults: 5,
-        timeoutMs: 12_000,
-        excludeDomains: ["pinterest.com", "facebook.com"],
-      }).catch(() => ({ results: [], images: [] })),
-    ),
-  );
-
-  const sources = toEvidence(batches.flatMap((batch) => batch.results)).slice(0, 8);
-  const allowedUrls = new Set(sources.map((source) => source.url));
-
-  if (sources.length === 0) {
-    return {
-      productId: product.id,
-      status: "insufficient_evidence",
-      mode: "live",
-      verdict: `No independent snippets were found for ${modelLabel}. Treat merchant ratings as unconfirmed.`,
-      pros: [],
-      concerns: [],
-      sources: [],
-      sourceCount: 0,
-      confidence: "low",
-      assessedAt: new Date().toISOString(),
-    };
+async function geminiReview(
+  product: Product,
+  sources: Evidence[],
+): Promise<Pick<SocialProofAudit, "verdict" | "pros" | "concerns" | "confidence" | "status"> | undefined> {
+  if (!getGeminiApiKey() || sources.length === 0) return undefined;
+  const payload = (await completeJson(
+    [
+      "Extract a short pros and cons list for this product from the numbered snippets only.",
+      "Return JSON: {\"verdict\": string, \"pros\": [{\"text\": string, \"source\": number}], \"concerns\": [{\"text\": string, \"source\": number}], \"confidence\": \"low\"|\"medium\"|\"high\"}.",
+      "source is the snippet number, and each claim must use the number of the snippet it came from. Different claims should cite different snippets when the facts come from different pages.",
+      "Each text is one short sentence stating a single fact from the snippets. Do not invent reviews.",
+    ].join(" "),
+    sources
+      .map((source, index) => `[${index + 1}] ${source.title}\n${source.excerpt}`)
+      .join("\n\n") + `\n\nProduct: ${product.brand} ${product.name}`,
+  )) as Record<string, unknown> | null;
+  if (!payload || typeof payload.verdict !== "string" || !payload.verdict.trim()) {
+    console.error("[audit] gemini payload", payload && typeof payload === "object" ? Object.keys(payload) : payload);
+    return undefined;
   }
-
-  if (!hasLlmAccess()) {
-    return {
-      productId: product.id,
-      status: "insufficient_evidence",
-      mode: "live",
-      verdict: `Found ${sources.length} independent pages for ${modelLabel}, but no model API key is configured to extract grounded claims.`,
-      pros: [],
-      concerns: [],
-      sources,
-      sourceCount: sources.length,
-      confidence: "low",
-      assessedAt: new Date().toISOString(),
-    };
-  }
-
-  const payload = await completeJson(
-    "Extract product-specific pros and concerns from these snippets. Every claim must cite one or more provided URLs. Do not infer defect rates, fake-review counts, or long-term durability from sparse snippets. Mark uncertainty explicitly. Return JSON matching {\"verdict\":\"string\",\"status\":\"complete\"|\"insufficient_evidence\",\"pros\":[{\"text\":\"\",\"evidenceUrls\":[],\"confidence\":\"low\"|\"medium\"|\"high\"}],\"concerns\":[...]}",
-    JSON.stringify({
-      product: { id: product.id, brand: product.brand, name: product.name },
-      sources,
-    }),
-  );
-
-  const object = payload && typeof payload === "object" ? payload : {};
-  const status =
-    "status" in object &&
-    (object.status === "complete" || object.status === "insufficient_evidence")
-      ? object.status
-      : sources.length >= 2
-        ? "complete"
-        : "insufficient_evidence";
-  const verdict =
-    "verdict" in object && typeof object.verdict === "string" && object.verdict.trim()
-      ? object.verdict.trim()
-      : `Independent snippets for ${modelLabel} are limited; claims below are only those tied to a source URL.`;
-
-  const pros = asClaims("pros" in object ? object.pros : [], allowedUrls).slice(0, 3);
-  const concerns = asClaims(
-    "concerns" in object ? object.concerns : [],
-    allowedUrls,
-  ).slice(0, 3);
-
+  const pros = asClaims(payload.pros, sources);
+  const concerns = asClaims(payload.concerns, sources);
+  const confidence =
+    payload.confidence === "high" || payload.confidence === "medium" || payload.confidence === "low"
+      ? payload.confidence
+      : "low";
   return {
-    productId: product.id,
-    status,
-    mode: "live",
-    verdict,
+    verdict: payload.verdict.trim(),
     pros,
     concerns,
+    confidence,
+    status: pros.length + concerns.length > 0 ? "complete" : "insufficient_evidence",
+  };
+}
+
+async function buildAudit(product: Product): Promise<SocialProofAudit> {
+  const demo = getDemoAudit(product.id);
+  let sources: Evidence[] = [];
+  if (getTavilyApiKey()) {
+    try {
+      const found = await tavilySearch(reviewQuery(product), {
+        maxResults: 8,
+        searchDepth: "advanced",
+        excludeDomains: ["amazon.co.uk", "www.amazon.co.uk"],
+        timeoutMs: 12_000,
+      });
+      sources = toEvidence(found.results.filter((result) => mentionsProduct(product, result)));
+    } catch {
+      sources = [];
+    }
+  }
+
+  const reviewed = await geminiReview(product, sources).catch((error: unknown) => {
+    console.error("[audit] gemini review failed", error instanceof Error ? error.message : error);
+    return undefined;
+  });
+  if (reviewed) {
+    return {
+      productId: product.id,
+      mode: "live",
+      sourceCount: sources.length,
+      sources,
+      assessedAt: new Date().toISOString(),
+      ...reviewed,
+    };
+  }
+
+  if (demo) return demo;
+  return {
+    productId: product.id,
+    status: "insufficient_evidence",
+    mode: sources.length > 0 ? "live" : "demo_fixture",
+    verdict: sources.length
+      ? `Found ${sources.length} pages about ${product.brand} ${product.name}, but Gemini did not extract grounded pros or cons.`
+      : `No independent review pages were found for ${product.brand} ${product.name}.`,
+    pros: [],
+    concerns: [],
     sources,
     sourceCount: sources.length,
-    confidence: confidenceFromSources(sources.length),
+    confidence: "low",
     assessedAt: new Date().toISOString(),
   };
 }
 
+function citationsCollapsed(audit: SocialProofAudit): boolean {
+  const urls = new Set(
+    [...audit.pros, ...audit.concerns].flatMap((claim) => claim.evidenceUrls),
+  );
+  return audit.sources.length > 1 && urls.size <= 1 && audit.pros.length + audit.concerns.length > 1;
+}
+
 export async function auditProduct(productId: string): Promise<SocialProofAudit> {
   const cached = getCachedAudit(productId);
-  if (cached) {
+  if (
+    cached &&
+    !citationsCollapsed(cached) &&
+    (cached.pros.length + cached.concerns.length > 0 || cached.mode === "demo_fixture")
+  ) {
     return cached;
   }
-
   const inflight = getAuditInflight(productId);
-  if (inflight) {
-    return inflight;
-  }
+  if (inflight) return inflight;
 
-  const work = (async () => {
-    const product = getCatalogProduct(productId);
-    if (!product) {
-      const fixture = getDemoAudit(productId);
-      if (fixture) {
-        rememberAudit(fixture);
-        return fixture;
-      }
-      throw new Error(`Unknown productId: ${productId}`);
-    }
-
-    try {
-      const audit = await liveAudit(product);
+  const product = getCatalogProduct(productId);
+  const promise = (product ? buildAudit(product) : Promise.resolve(getDemoAudit(productId))).then(
+    (audit) => {
+      if (!audit) throw new Error(`Unknown productId: ${productId}`);
       rememberAudit(audit);
       return audit;
-    } catch {
-      const fixture = getDemoAudit(productId);
-      if (fixture) {
-        rememberAudit(fixture);
-        return fixture;
-      }
-      const failed: SocialProofAudit = {
-        productId,
-        status: "error",
-        mode: "live",
-        verdict:
-          "Live evidence search failed. No demo snapshot exists for this product, so no claims are shown.",
-        pros: [],
-        concerns: [],
-        sources: [],
-        sourceCount: 0,
-        confidence: "low",
-        assessedAt: new Date().toISOString(),
-      };
-      rememberAudit(failed);
-      return failed;
-    }
-  })();
-
-  setAuditInflight(productId, work);
+    },
+  );
+  setAuditInflight(productId, promise);
   try {
-    return await work;
+    return await promise;
   } finally {
     clearAuditInflight(productId);
   }

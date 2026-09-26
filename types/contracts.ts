@@ -6,6 +6,12 @@ export type Evidence = {
   publishedAt?: string;
 };
 
+export type ProductMatch = {
+  kind: "exact" | "similar";
+  // Why a similar product falls short, e.g. "£4.99 over your £25 budget".
+  notes: string[];
+};
+
 export type Product = {
   id: string;
   name: string;
@@ -18,6 +24,35 @@ export type Product = {
   merchantReviewCount?: number;
   category: string;
   attributes: Record<string, string | number | boolean>;
+  match?: ProductMatch;
+};
+
+export type SearchConstraints = {
+  query: string;
+  product: string;
+  // Must appear in the listing title (or a synonym), e.g. "noise cancelling", "sony".
+  keywords: string[];
+  // Soft preferences used only for ranking, e.g. "secure fit".
+  preferences: string[];
+  excludes: string[];
+  minPricePence?: number;
+  maxPricePence?: number;
+  preferCheap: boolean;
+  // True when the buyer asked for a case/cover/etc., not the device itself.
+  allowAccessories: boolean;
+  // Clean merchant query, e.g. "Apple MacBook Pro 2025 laptop".
+  searchQuery: string;
+  tavilyQuery?: string;
+  // Set when the buyer named a model ("WH-1000XM5", "MacBook Pro 2025"). Tavily searches this string.
+  specificProduct?: string;
+};
+
+export type ProductSearchResponse = {
+  products: Product[];
+  similar: Product[];
+  constraints?: SearchConstraints;
+  source: "live" | "demo_fixture";
+  warning?: string;
 };
 
 export type Claim = {

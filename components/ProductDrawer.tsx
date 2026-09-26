@@ -4,6 +4,7 @@ import {
   displayAttributes,
   merchantHost,
   priceCheckLabel,
+  sourceNumber,
 } from "@/lib/productDisplay";
 import type { Product, SocialProofAudit } from "@/types/contracts";
 import Image from "next/image";
@@ -30,6 +31,7 @@ type ProductDrawerProps = {
   product: Product;
   audit?: SocialProofAudit;
   recommended?: boolean;
+  evidenceLoading?: boolean;
   onClose: () => void;
   onBuy: () => void;
 };
@@ -38,6 +40,7 @@ export function ProductDrawer({
   product,
   audit,
   recommended,
+  evidenceLoading,
   onClose,
   onBuy,
 }: ProductDrawerProps) {
@@ -106,6 +109,11 @@ export function ProductDrawer({
             {host ? (
               <p className="mt-2 text-xs text-[#45474a]">Sold via {host}</p>
             ) : null}
+            {product.match?.kind === "similar" && product.match.notes.length > 0 ? (
+              <p className="mt-2 inline-block rounded bg-amber-50 px-2 py-1 text-xs font-semibold text-amber-900">
+                Close alternative: {product.match.notes.join(" · ")}
+              </p>
+            ) : null}
             {product.merchantRating !== undefined ? (
               <div className="mt-2 flex items-center gap-1 text-[#45474a]">
                 <span className="material-symbols-outlined text-[18px] text-[#191c1e]">
@@ -169,7 +177,7 @@ export function ProductDrawer({
                   {audit.pros.map((claim) => (
                     <li key={claim.text}>
                       {claim.text}
-                      {claim.evidenceUrls.map((url, index) => (
+                      {claim.evidenceUrls.map((url) => (
                         <a
                           key={url}
                           href={url}
@@ -177,7 +185,7 @@ export function ProductDrawer({
                           rel="noreferrer"
                           className="ml-1 font-semibold text-[#1c1917] underline"
                         >
-                          [{index + 1}]
+                          [{sourceNumber(audit.sources, url)}]
                         </a>
                       ))}
                     </li>
@@ -192,7 +200,7 @@ export function ProductDrawer({
                   {audit.concerns.map((claim) => (
                     <li key={claim.text}>
                       {claim.text}
-                      {claim.evidenceUrls.map((url, index) => (
+                      {claim.evidenceUrls.map((url) => (
                         <a
                           key={url}
                           href={url}
@@ -200,7 +208,7 @@ export function ProductDrawer({
                           rel="noreferrer"
                           className="ml-1 font-semibold text-[#1c1917] underline"
                         >
-                          [{index + 1}]
+                          [{sourceNumber(audit.sources, url)}]
                         </a>
                       ))}
                     </li>
@@ -208,7 +216,7 @@ export function ProductDrawer({
                 </ul>
               </div>
               <div className="mt-4 space-y-2">
-                {audit.sources.map((source) => (
+                {audit.sources.map((source, index) => (
                   <a
                     key={source.url}
                     href={source.url}
@@ -216,7 +224,9 @@ export function ProductDrawer({
                     rel="noreferrer"
                     className="block rounded-lg bg-white p-3 hover:bg-[#eceef0]"
                   >
-                    <p className="text-xs font-bold">{source.title}</p>
+                    <p className="text-xs font-bold">
+                      [{index + 1}] {source.title}
+                    </p>
                     <p className="mt-1 text-[13px] text-[#45474a]">
                       {source.excerpt}
                     </p>
@@ -230,7 +240,9 @@ export function ProductDrawer({
             </div>
           ) : (
             <p className="text-sm text-[#45474a]">
-              No evidence snapshot for this product yet.
+              {evidenceLoading
+                ? "Checking independent evidence…"
+                : "No evidence snapshot for this product yet."}
             </p>
           )}
         </div>

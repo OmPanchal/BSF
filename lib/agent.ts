@@ -1,8 +1,7 @@
 import { auditProduct } from "@/lib/audit";
 import { getCatalogProducts, rememberProducts } from "@/lib/catalog";
 import { getDemoAgentTask, getDemoProducts } from "@/lib/demoFixture";
-import { completeJson, hasLlmAccess } from "@/lib/llm";
-import { parseBudgetPence } from "@/lib/searchProducts";
+import { completeJson, getGeminiApiKey } from "@/lib/llm";
 import type { AgentEvent, AgentTask, Product, SocialProofAudit } from "@/types/contracts";
 
 function nowIso(): string {
@@ -10,93 +9,76 @@ function nowIso(): string {
 }
 
 function event(step: number, message: string, sourceUrl?: string): AgentEvent {
-  return {
-    step,
-    timestamp: nowIso(),
-    status: "success",
-    message,
-    sourceUrl,
-  };
+  return { step, timestamp: nowIso(), status: "success", message, sourceUrl };
 }
 
 function heuristicPick(
-  intent: string,
   products: Product[],
   audits: SocialProofAudit[],
 ): { selectedProductId: string; rationale: string } {
-  const budget = parseBudgetPence(intent);
-  const intentTerms = intent
-    .toLowerCase()
-    .split(/[^a-z0-9]+/)
-    .filter((term) => term.length > 3);
-
   const ranked = [...products].sort((a, b) => {
     const aAudit = audits.find((audit) => audit.productId === a.id);
     const bAudit = audits.find((audit) => audit.productId === b.id);
-    const aConcerns = aAudit?.concerns.length ?? 0;
-    const bConcerns = bAudit?.concerns.length ?? 0;
-    if (aConcerns !== bConcerns) {
-      return aConcerns - bConcerns;
-    }
-    const haystack = (product: Product) =>
-      `${product.brand} ${product.name} ${JSON.stringify(product.attributes)}`.toLowerCase();
-    const aHits = intentTerms.filter((term) => haystack(a).includes(term)).length;
-    const bHits = intentTerms.filter((term) => haystack(b).includes(term)).length;
-    if (aHits !== bHits) {
-      return bHits - aHits;
-    }
+    const aScore = (aAudit?.pros.length ?? 0) - (aAudit?.concerns.length ?? 0);
+    const bScore = (bAudit?.pros.length ?? 0) - (bAudit?.concerns.length ?? 0);
+    if (aScore !== bScore) return bScore - aScore;
+    const aExact = a.match?.kind === "exact" ? 1 : 0;
+    const bExact = b.match?.kind === "exact" ? 1 : 0;
+    if (aExact !== bExact) return bExact - aExact;
     return a.pricePence - b.pricePence;
   });
-
-  const selected =
-    ranked.find(
-      (product) => budget === undefined || product.pricePence <= budget,
-    ) ?? ranked[0];
-
-  const audit = audits.find((item) => item.productId === selected.id);
-  const concern = audit?.concerns[0]?.text;
+  const selected = ranked[0];
   const price = `£${(selected.pricePence / 100).toFixed(2)}`;
-  const rationale = [
-    `${selected.brand} ${selected.name} is the closest match to this buyer request at ${price}${
-      budget ? ", within the stated budget" : ""
-    }.`,
-    concern
-      ? `Independent notes still include: ${concern}`
-      : "Independent evidence is limited, so this is a constrained recommendation rather than a certainty.",
-  ].join(" ");
-
-  return { selectedProductId: selected.id, rationale };
+  return {
+    selectedProductId: selected.id,
+    rationale: `${selected.brand} ${selected.name} is the closest match at ${price}. Review evidence was not scored by Gemini, so this is a constrained pick.`,
+  };
 }
 
-async function llmPick(
+async function geminiPick(
   intent: string,
   products: Product[],
   audits: SocialProofAudit[],
-): Promise<{ selectedProductId: string; rationale: string } | null> {
-  try {
-    const payload = await completeJson(
-      "Choose one product ID that best matches the buyer intent. Prefer budget fit and cited concerns over merchant star ratings. Do not invent facts that are not in the product or audit JSON. Return {\"selectedProductId\":\"\",\"rationale\":\"\"}.",
-      JSON.stringify({ intent, products, audits }),
-    );
-    if (
-      payload &&
-      typeof payload === "object" &&
-      "selectedProductId" in payload &&
-      typeof payload.selectedProductId === "string" &&
-      products.some((product) => product.id === payload.selectedProductId) &&
-      "rationale" in payload &&
-      typeof payload.rationale === "string" &&
-      payload.rationale.trim()
-    ) {
-      return {
-        selectedProductId: payload.selectedProductId,
-        rationale: payload.rationale.trim(),
-      };
-    }
-  } catch {
-    return null;
+): Promise<{ selectedProductId: string; rationale: string } | undefined> {
+  if (!getGeminiApiKey()) return undefined;
+  const payload = (await completeJson(
+    [
+      "Pick the single best product for the buyer.",
+      "Use only the supplied prices, match notes, pros, and concerns. Do not invent reviews.",
+      "Prefer an exact match inside budget with fewer cited concerns.",
+      "Return JSON {\"selectedProductId\": string, \"rationale\": string}.",
+      "The id must be one of the provided product ids.",
+    ].join(" "),
+    JSON.stringify({
+      intent,
+      products: products.map((product) => ({
+        id: product.id,
+        name: `${product.brand} ${product.name}`,
+        pricePence: product.pricePence,
+        match: product.match,
+        rating: product.merchantRating,
+        reviews: product.merchantReviewCount,
+      })),
+      audits: audits.map((audit) => ({
+        productId: audit.productId,
+        verdict: audit.verdict,
+        pros: audit.pros.map((claim) => claim.text),
+        concerns: audit.concerns.map((claim) => claim.text),
+      })),
+    }),
+  )) as Record<string, unknown> | null;
+  if (
+    !payload ||
+    typeof payload.selectedProductId !== "string" ||
+    typeof payload.rationale !== "string" ||
+    !products.some((product) => product.id === payload.selectedProductId)
+  ) {
+    return undefined;
   }
-  return null;
+  return {
+    selectedProductId: payload.selectedProductId,
+    rationale: payload.rationale.trim(),
+  };
 }
 
 export async function createAgentTask(
@@ -108,8 +90,7 @@ export async function createAgentTask(
     fromCatalog.length > 0
       ? fromCatalog
       : getDemoProducts().filter(
-          (product) =>
-            candidateIds.length === 0 || candidateIds.includes(product.id),
+          (product) => candidateIds.length === 0 || candidateIds.includes(product.id),
         );
 
   if (products.length === 0) {
@@ -119,16 +100,10 @@ export async function createAgentTask(
 
   const ids = products.map((product) => product.id);
   const audits = await Promise.all(ids.map((id) => auditProduct(id)));
-  const picked =
-    (hasLlmAccess() ? await llmPick(intent, products, audits) : null) ??
-    heuristicPick(intent, products, audits);
-
-  const selected = products.find(
-    (product) => product.id === picked.selectedProductId,
-  );
-  const selectedAudit = audits.find(
-    (audit) => audit.productId === picked.selectedProductId,
-  );
+  const picked = (await geminiPick(intent, products, audits).catch(() => undefined)) ??
+    heuristicPick(products, audits);
+  const selected = products.find((product) => product.id === picked.selectedProductId);
+  const selectedAudit = audits.find((audit) => audit.productId === picked.selectedProductId);
 
   return {
     taskId: `task-${Date.now()}`,
@@ -139,22 +114,14 @@ export async function createAgentTask(
     selectedProductId: picked.selectedProductId,
     rationale: picked.rationale,
     events: [
-      event(1, `Matched ${products.length} live merchant listing(s) to the buyer intent.`),
+      event(1, `Kept ${products.length} listing(s) after a timed pass across the search sources.`),
       event(
         2,
-        `Read independent snippets for ${selected?.brand ?? "the selected product"} ${selected?.name ?? ""}`.trim(),
+        `Gemini read review snippets for ${selected?.brand ?? "the selected product"} ${selected?.name ?? ""}`.trim(),
         selectedAudit?.sources[0]?.url,
       ),
-      event(
-        3,
-        audits.every((audit) => audit.mode === "live")
-          ? "Compared candidates against budget and cited concerns from live search."
-          : "Compared candidates using a mix of live search and labelled demo evidence.",
-      ),
-      event(
-        4,
-        "Stopped for human approval before any purchase handoff. Opening a merchant page is not a completed order.",
-      ),
+      event(3, "Ranked exact matches ahead of near misses using cited pros and concerns."),
+      event(4, "Stopped for human approval before any purchase handoff. Opening a merchant page is not a completed order."),
     ],
   };
 }
